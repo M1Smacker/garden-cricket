@@ -26,7 +26,7 @@ body{background:var(--bg);color:var(--white);font-family:var(--font);min-height:
 /* SCREEN SYSTEM */
 .screen{position:fixed;inset:0;overflow-y:auto;overflow-x:hidden;background:var(–bg);transform:translateX(100%);transition:transform 250ms ease-in-out;z-index:1;pointer-events:none}
 .screen.active{transform:translateX(0);pointer-events:all;z-index:2}
-.screen.slide-out-left{transform:translateX(-30%);pointer-events:none;z-index:1}
+.screen.slide-out-left{transform:translateX(-30%);pointer-events:none;z-index:0}
 .screen.prev{transform:translateX(-30%)}
 
 /* HOME */
@@ -35,7 +35,7 @@ body{background:var(--bg);color:var(--white);font-family:var(--font);min-height:
 .home-logo{font-family:var(–display);font-size:52px;letter-spacing:6px;color:var(–accent);line-height:1}
 .home-sub{font-size:11px;letter-spacing:3px;color:var(–muted);margin-top:6px;text-transform:uppercase}
 .home-btns{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;max-width:440px;margin-bottom:28px}
-.home-btn{padding:22px 12px;border-radius:14px;border:none;cursor:pointer;font-family:var(–display);font-size:22px;letter-spacing:3px;text-align:center;transition:transform 150ms;display:flex;flex-direction:column;align-items:center;gap:8px}
+.home-btn{padding:22px 12px;border-radius:14px;border:none;cursor:pointer;font-family:var(–font);font-size:18px;font-weight:700;letter-spacing:2px;text-align:center;transition:transform 150ms;display:flex;flex-direction:column;align-items:center;gap:8px}
 .home-btn:active{transform:scale(0.95)}
 .home-btn-icon{font-size:32px}
 .home-btn.match{background:linear-gradient(135deg,#0a1f3a,#0d2a50);border:1px solid var(–accent);color:var(–accent)}
