@@ -1547,15 +1547,8 @@ function renderRetroMatchList(){
   _rbMatches.forEach(m=>{
     const selIdx=_rbSelected.indexOf(m.id);
     const isSel=selIdx!==-1;
-    // Disable if different teams from the locked pair
-    let disabled=false;
-    if(_rbLockedTeams&&!isSel){
-      const ms=[...m.teams].sort().join('|');
-      const ls=[..._rbLockedTeams].sort().join('|');
-      if(ms!==ls)disabled=true;
-    }
     const item=document.createElement('div');
-    item.className='rb-match-item'+(isSel?' selected':'')+(disabled?' disabled':'');
+    item.className='rb-match-item'+(isSel?' selected':'');
     item.innerHTML=`
       <div class="rb-check">${isSel?'✓':''}</div>
       <div class="rb-info">
@@ -1564,7 +1557,7 @@ function renderRetroMatchList(){
       </div>
       ${isSel?`<div class="rb-order">M${selIdx+1}</div>`:''}
     `;
-    if(!disabled)item.onclick=()=>toggleRetroMatch(m);
+    item.onclick=()=>toggleRetroMatch(m);
     list.appendChild(item);
   });
   updateRetroConfirmBtn();
@@ -1573,12 +1566,8 @@ function renderRetroMatchList(){
 function toggleRetroMatch(m){
   const idx=_rbSelected.indexOf(m.id);
   if(idx!==-1){
-    // deselect
     _rbSelected.splice(idx,1);
-    if(_rbSelected.length===0)_rbLockedTeams=null;
   } else {
-    // first pick locks the team pairing
-    if(_rbSelected.length===0)_rbLockedTeams=[...m.teams];
     _rbSelected.push(m.id);
   }
   renderRetroMatchList();
