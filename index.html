@@ -406,6 +406,22 @@ td.g{color:var(--green)}td.gl{color:var(--gold)}td.mu{color:var(--muted)}td.ac{c
 .catcher-btn{width:100%;padding:12px 16px;background:var(--card2);border:1px solid var(--border2);border-radius:10px;font-family:var(--font);font-size:16px;font-weight:600;color:var(--white);cursor:pointer;text-align:left;transition:all .12s}
 .catcher-btn:active{background:var(--orangedim);border-color:var(--orange);color:var(--orange)}
 .catcher-unknown{color:var(--muted);font-size:14px}
+/* PASSWORD MODAL */
+.pw-overlay{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;z-index:1200;padding:20px}
+.pw-overlay.show{display:flex}
+.pw-box{background:var(--card);border:1.5px solid var(--accent);border-radius:16px;padding:26px 22px;width:100%;max-width:340px;text-align:center}
+.pw-icon{font-size:38px;margin-bottom:8px}
+.pw-title{font-family:var(--display);font-size:24px;letter-spacing:3px;color:var(--accent);margin-bottom:4px}
+.pw-sub{font-size:13px;color:var(--muted);margin-bottom:18px}
+.pw-input{width:100%;background:var(--card2);border:1.5px solid var(--border2);border-radius:10px;color:var(--white);font-family:var(--mono);font-size:22px;font-weight:700;padding:14px;outline:none;text-align:center;letter-spacing:4px;margin-bottom:12px}
+.pw-input:focus{border-color:var(--accent)}
+.pw-input.wrong{border-color:var(--red);animation:shake .35s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.pw-err{font-size:12px;color:var(--red);margin-bottom:10px;min-height:16px}
+.pw-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pw-btn{padding:12px;border-radius:10px;font-family:var(--font);font-size:15px;font-weight:700;letter-spacing:1px;cursor:pointer;border:none;text-transform:uppercase}
+.pw-btn.ok{background:var(--accent);color:#050a18}
+.pw-btn.cancel{background:transparent;border:1.5px solid var(--border2);color:var(--muted)}
 /* SERIES */
 .series-badge{display:inline-block;padding:2px 8px;background:var(--golddim);border:1px solid var(--gold);border-radius:10px;font-size:9px;color:var(--gold);font-weight:700;letter-spacing:1px;margin-top:3px}
 .series-between{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;z-index:900;padding:18px}
@@ -429,6 +445,16 @@ td.g{color:var(--green)}td.gl{color:var(--gold)}td.mu{color:var(--muted)}td.ac{c
 .match-thumb-label{font-size:11px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:2px}
 .match-thumb-score{font-size:14px;font-weight:700;color:var(--white)}
 .match-thumb-winner{font-size:11px;color:var(--green);margin-top:2px}
+.rb-match-item{background:var(--card);border:1.5px solid var(--border);border-radius:10px;padding:12px 13px;display:flex;align-items:center;gap:11px;cursor:pointer;margin-bottom:7px;transition:all .15s}
+.rb-match-item.selected{border-color:var(--accent);background:var(--accentdim)}
+.rb-match-item.disabled{opacity:.35;pointer-events:none}
+.rb-check{width:22px;height:22px;border-radius:6px;border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:transparent;font-size:14px;font-weight:700;background:var(--card2)}
+.rb-match-item.selected .rb-check{background:var(--accent);border-color:var(--accent);color:#050a18}
+.rb-info{flex:1;min-width:0}
+.rb-teams{font-size:14px;font-weight:700;color:var(--white)}
+.rb-meta{font-size:11px;color:var(--muted);margin-top:2px}
+.rb-order{background:var(--accent);color:#050a18;font-family:var(--mono);font-weight:700;border-radius:6px;padding:2px 7px;font-size:11px;flex-shrink:0}
+.rb-footer{position:sticky;bottom:0;background:var(--bg);padding:12px 0;margin-top:14px;border-top:1px solid var(--border)}
 </style>
 </head>
 <body>
@@ -454,11 +480,11 @@ td.g{color:var(--green)}td.gl{color:var(--gold)}td.mu{color:var(--muted)}td.ac{c
     </div>
   </div>
   <div class="home-btns">
-    <button class="home-btn match" onclick="goTo('setup')"><span class="home-btn-icon">🏏</span>NEW MATCH</button>
+    <button class="home-btn match" onclick="goToProtected('setup')"><span class="home-btn-icon">🏏</span>NEW MATCH</button>
     <button class="home-btn lb" onclick="goTo('leaderboard')"><span class="home-btn-icon">🏆</span>LEADERBOARD</button>
   </div>
   <div style="width:100%;max-width:440px;margin-bottom:16px">
-    <button style="width:100%;padding:16px;border-radius:12px;border:1px solid var(--gold);background:var(--golddim);font-family:var(--display);font-size:20px;letter-spacing:2px;color:var(--gold);cursor:pointer;" onclick="goTo('series-setup')">🏆 CREATE SERIES</button>
+    <button style="width:100%;padding:16px;border-radius:12px;border:1px solid var(--gold);background:var(--golddim);font-family:var(--display);font-size:20px;letter-spacing:2px;color:var(--gold);cursor:pointer;" onclick="goToProtected('series-setup')">🏆 CREATE SERIES</button>
   </div>
   <div class="recent-section">
     <div class="recent-title">Recent Matches</div>
@@ -679,6 +705,28 @@ td.g{color:var(--green)}td.gl{color:var(--gold)}td.mu{color:var(--muted)}td.ac{c
   </div>
 </div>
 
+<!-- RETRO SERIES BUILDER -->
+<div id="series-retro" class="screen">
+  <div class="page-wrap">
+    <div class="back-btn" onclick="goBack()">← Back</div>
+    <div class="page-title" style="color:var(--gold)">BUILD SERIES</div>
+    <div class="scard">
+      <div class="scard-title" style="color:var(--gold)">Series Details</div>
+      <label>Series name</label>
+      <input type="text" id="rb-name" placeholder="e.g. Saturday Series">
+      <label style="margin-top:4px">Instructions</label>
+      <div style="font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:4px">Tap matches in the order they were played. First tap = Match 1, second = Match 2, etc. Tap again to deselect. Only matches between the same two teams can be combined.</div>
+    </div>
+    <div class="scard">
+      <div class="scard-title">Select Matches</div>
+      <div id="rb-match-list"><div class="no-data">Loading...</div></div>
+    </div>
+    <div class="rb-footer">
+      <button class="btn-main" id="rb-confirm-btn" style="background:var(--gold);color:#050a18" onclick="confirmRetroSeries()" disabled>Pick at least 2 matches</button>
+    </div>
+  </div>
+</div>
+
 <!-- SERIES BETWEEN MATCHES OVERLAY -->
 <div class="series-between" id="sbo">
   <div class="sbo-box">
@@ -761,6 +809,21 @@ td.g{color:var(--green)}td.gl{color:var(--gold)}td.mu{color:var(--muted)}td.ac{c
   </div>
 </div>
 
+<!-- PASSWORD MODAL -->
+<div class="pw-overlay" id="pw-overlay">
+  <div class="pw-box">
+    <div class="pw-icon">🔒</div>
+    <div class="pw-title" id="pw-title">ENTER PASSWORD</div>
+    <div class="pw-sub" id="pw-sub">Required to create a match or series</div>
+    <input type="password" inputmode="numeric" class="pw-input" id="pw-input" placeholder="••••" maxlength="20" autocomplete="off">
+    <div class="pw-err" id="pw-err"></div>
+    <div class="pw-btns">
+      <button class="pw-btn cancel" onclick="closePwModal()">Cancel</button>
+      <button class="pw-btn ok" onclick="confirmPw()">Unlock</button>
+    </div>
+  </div>
+</div>
+
 <div class="sync-bar" id="sync-bar"></div>
 
 <!-- THEME TOGGLE -->
@@ -780,6 +843,7 @@ td.g{color:var(--green)}td.gl{color:var(--gold)}td.mu{color:var(--muted)}td.ac{c
     async deleteActiveMatch(){localStorage.removeItem('gcam');},
     async createSeries(d){const ss=G2._g('gcs');const id='LS'+Date.now();ss.unshift({id,...d});G2._s('gcs',ss);return id;},
     async updateSeries(id,d){const ss=G2._g('gcs');const i=ss.findIndex(s=>s.id===id);if(i>=0){ss[i]={...ss[i],...d};G2._s('gcs',ss);}},
+    async updateMatch(id,d){const ms=G2._g('gcm');const i=ms.findIndex(m=>m.id===id);if(i>=0){ms[i]={...ms[i],...d};G2._s('gcm',ms);}},
     async getSeries(){return G2._g('gcs').sort((a,b)=>(b.ts||0)-(a.ts||0));},
     async getSeriesById(id){return G2._g('gcs').find(s=>s.id===id)||null;},
   };
@@ -804,6 +868,7 @@ td.g{color:var(--green)}td.gl{color:var(--gold)}td.mu{color:var(--muted)}td.ac{c
       async deleteActiveMatch(){await db.collection('active_match').doc('current').delete();},
       async createSeries(d){const r=await db.collection('series').add(d);return r.id;},
       async updateSeries(id,d){await db.collection('series').doc(id).update(d);},
+      async updateMatch(id,d){await db.collection('matches').doc(id).update(d);},
       async getSeries(){const s=await db.collection('series').orderBy('ts','desc').limit(50).get();return s.docs.map(d=>({id:d.id,...d.data()}));},
       async getSeriesById(id){const s=await db.collection('series').doc(id).get();return s.exists?{id:s.id,...s.data()}:null;},
     };
@@ -825,6 +890,60 @@ function toggleTheme(){
   setTimeout(()=>document.body.classList.remove('tt'),300);
 }
 initTheme();
+
+// ═══ PASSWORD GATE ═══
+// SHA-256 hash of the password. The raw password never appears in source.
+const PW_HASH='7c72066c66a912cdecd0cc67136a49d31796193a26486d6b494b131c0d24f058';
+let _pwCallback=null;
+async function sha256Hex(str){
+  const buf=new TextEncoder().encode(str);
+  const hash=await crypto.subtle.digest('SHA-256',buf);
+  return Array.from(new Uint8Array(hash)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+function requirePw(callback){
+  // If already unlocked this session, just run
+  if(sessionStorage.getItem('gc-unlocked')==='1'){callback();return;}
+  _pwCallback=callback;
+  const inp=document.getElementById('pw-input');
+  inp.value='';
+  document.getElementById('pw-err').textContent='';
+  inp.classList.remove('wrong');
+  document.getElementById('pw-overlay').classList.add('show');
+  setTimeout(()=>inp.focus(),100);
+}
+function closePwModal(){
+  document.getElementById('pw-overlay').classList.remove('show');
+  _pwCallback=null;
+}
+async function confirmPw(){
+  const inp=document.getElementById('pw-input');
+  const err=document.getElementById('pw-err');
+  const val=inp.value.trim();
+  if(!val){err.textContent='Enter the password';return;}
+  try{
+    const h=await sha256Hex(val);
+    if(h===PW_HASH){
+      sessionStorage.setItem('gc-unlocked','1');
+      const cb=_pwCallback;
+      closePwModal();
+      if(cb)cb();
+    } else {
+      inp.classList.add('wrong');
+      err.textContent='Wrong password. Ask Ahmed.';
+      setTimeout(()=>inp.classList.remove('wrong'),400);
+      inp.value='';
+      inp.focus();
+    }
+  } catch(e){err.textContent='Could not verify password';}
+}
+// Enter key submits
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&document.getElementById('pw-overlay').classList.contains('show')){
+    e.preventDefault();confirmPw();
+  }
+});
+// Gated navigation helpers
+function goToProtected(screenId){requirePw(()=>goTo(screenId));}
 
 // ═══ STATE ═══
 const G={
@@ -1394,6 +1513,120 @@ function aggregateSeriesStats(matches){
   return{batsmen:Object.values(bMap),bowlers:Object.values(bwMap)};
 }
 
+// ═══ RETRO SERIES BUILDER ═══
+// Lets you group existing normal matches into a new series retroactively.
+let _rbMatches=[];        // all eligible matches (not already in a series)
+let _rbSelected=[];       // array of match IDs in selection order
+let _rbLockedTeams=null;  // [teamA, teamB] once first match is picked — enforces consistency
+
+function openRetroSeriesBuilder(){
+  // Gate with password — only Ahmed should be able to do this
+  requirePw(async()=>{
+    _rbSelected=[];_rbLockedTeams=null;
+    document.getElementById('rb-name').value='';
+    goTo('series-retro');
+    await loadRetroMatches();
+  });
+}
+
+async function loadRetroMatches(){
+  const list=document.getElementById('rb-match-list');
+  if(!window._dbReady){list.innerHTML='<div class="no-data">Not connected</div>';return;}
+  try{
+    const all=await window._db.getMatches();
+    // Only matches not already part of a series are eligible
+    _rbMatches=all.filter(m=>!m.seriesId);
+    if(_rbMatches.length<2){list.innerHTML='<div class="no-data">Need at least 2 standalone matches to build a series</div>';return;}
+    renderRetroMatchList();
+  }catch(e){list.innerHTML='<div class="no-data">Could not load matches</div>';}
+}
+
+function renderRetroMatchList(){
+  const list=document.getElementById('rb-match-list');
+  list.innerHTML='';
+  _rbMatches.forEach(m=>{
+    const selIdx=_rbSelected.indexOf(m.id);
+    const isSel=selIdx!==-1;
+    // Disable if different teams from the locked pair
+    let disabled=false;
+    if(_rbLockedTeams&&!isSel){
+      const ms=[...m.teams].sort().join('|');
+      const ls=[..._rbLockedTeams].sort().join('|');
+      if(ms!==ls)disabled=true;
+    }
+    const item=document.createElement('div');
+    item.className='rb-match-item'+(isSel?' selected':'')+(disabled?' disabled':'');
+    item.innerHTML=`
+      <div class="rb-check">${isSel?'✓':''}</div>
+      <div class="rb-info">
+        <div class="rb-teams">${m.teams[0]} vs ${m.teams[1]}</div>
+        <div class="rb-meta">${m.date} · ${m.scores[0]} vs ${m.scores[1]} · ${m.winner} won</div>
+      </div>
+      ${isSel?`<div class="rb-order">M${selIdx+1}</div>`:''}
+    `;
+    if(!disabled)item.onclick=()=>toggleRetroMatch(m);
+    list.appendChild(item);
+  });
+  updateRetroConfirmBtn();
+}
+
+function toggleRetroMatch(m){
+  const idx=_rbSelected.indexOf(m.id);
+  if(idx!==-1){
+    // deselect
+    _rbSelected.splice(idx,1);
+    if(_rbSelected.length===0)_rbLockedTeams=null;
+  } else {
+    // first pick locks the team pairing
+    if(_rbSelected.length===0)_rbLockedTeams=[...m.teams];
+    _rbSelected.push(m.id);
+  }
+  renderRetroMatchList();
+}
+
+function updateRetroConfirmBtn(){
+  const btn=document.getElementById('rb-confirm-btn');
+  if(_rbSelected.length<2){btn.disabled=true;btn.textContent='Pick at least 2 matches';btn.style.opacity='.5';}
+  else{btn.disabled=false;btn.textContent=`Create Series (${_rbSelected.length} matches)`;btn.style.opacity='1';}
+}
+
+async function confirmRetroSeries(){
+  if(_rbSelected.length<2)return;
+  const name=document.getElementById('rb-name').value.trim()||'Series';
+  if(!window._dbReady){alert('Not connected');return;}
+  // Build payload in selection order
+  const selectedMatches=_rbSelected.map(id=>_rbMatches.find(m=>m.id===id));
+  const teams=_rbLockedTeams||selectedMatches[0].teams;
+  // Tally wins
+  const wins=[0,0];
+  selectedMatches.forEach(m=>{
+    if(m.winner===teams[0])wins[0]++;
+    else if(m.winner===teams[1])wins[1]++;
+  });
+  const total=selectedMatches.length;
+  const d=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+  const payload={
+    name,totalMatches:total,completedMatches:total,
+    wins,matchIds:[..._rbSelected],
+    teams:[...teams],players:[[],[]],
+    overs:selectedMatches[0].matchData?(JSON.parse(selectedMatches[0].matchData).totalOvers||6):6,
+    status:'completed',ts:Date.now(),date:d,
+    retroBuilt:true,
+  };
+  try{
+    syncMsg('Building series...','saving');
+    const seriesId=await window._db.createSeries(payload);
+    // Tag each match with seriesId + matchNum
+    for(let i=0;i<_rbSelected.length;i++){
+      await window._db.updateMatch(_rbSelected[i],{seriesId,matchNum:i+1});
+    }
+    syncMsg('✓ Series built','ok');
+    _rbSelected=[];_rbLockedTeams=null;
+    // Go to the new series detail
+    openSeriesDetailById(seriesId);
+  }catch(e){syncMsg('Failed: '+e.message,'error');}
+}
+
 // ═══ HOME ═══
 async function loadHomeRecent(){
   const el=document.getElementById('home-recent');if(!window._dbReady){el.innerHTML='<div class="empty-state">Connecting...</div>';return;}
@@ -1424,8 +1657,9 @@ async function loadHistContent(){
       body.innerHTML=`<div class="hist-list">${matches.map(m=>{const badge=m.seriesId?`<div class="series-badge">SERIES M${m.matchNum||''}</div>`:'';return`<div class="hist-item" onclick="viewMatchById('${m.id}')"><div><div class="hist-teams">${m.teams[0]} vs ${m.teams[1]}</div><div class="hist-date">${m.date}</div>${badge}</div><div style="text-align:right"><div class="hist-result">${m.winner}</div><div style="font-size:10px;color:var(--muted);margin-top:2px">${m.scores[0]} · ${m.scores[1]}</div></div></div>`;}).join('')}</div>`;
     } else {
       const series=await window._db.getSeries();
-      if(series.length===0){body.innerHTML='<div class="no-data">No series yet</div>';return;}
-      body.innerHTML=`<div class="hist-list">${series.map(s=>{const wins=s.wins||[0,0];const statusColor=s.status==='completed'?'var(--green)':'var(--orange)';return`<div class="hist-item" onclick="openSeriesDetailById('${s.id}')"><div><div class="hist-teams">🏆 ${s.name}</div><div class="hist-date">${s.date} · ${(s.teams||[]).join(' vs ')}</div><div style="font-size:11px;margin-top:2px;color:${statusColor}">${s.status==='completed'?'COMPLETED':'ONGOING · M'+s.completedMatches+'/'+s.totalMatches}</div></div><div style="text-align:right"><div class="hist-result" style="font-size:18px;font-family:var(--mono)">${wins[0]}–${wins[1]}</div></div></div>`;}).join('')}</div>`;
+      const buildBtn=`<button style="width:100%;padding:13px;border-radius:10px;border:1.5px dashed var(--gold);background:transparent;color:var(--gold);font-family:var(--font);font-size:14px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;margin-bottom:12px" onclick="openRetroSeriesBuilder()">🔧 Build Series From Matches</button>`;
+      if(series.length===0){body.innerHTML=buildBtn+'<div class="no-data">No series yet</div>';return;}
+      body.innerHTML=buildBtn+`<div class="hist-list">${series.map(s=>{const wins=s.wins||[0,0];const statusColor=s.status==='completed'?'var(--green)':'var(--orange)';return`<div class="hist-item" onclick="openSeriesDetailById('${s.id}')"><div><div class="hist-teams">🏆 ${s.name}</div><div class="hist-date">${s.date} · ${(s.teams||[]).join(' vs ')}</div><div style="font-size:11px;margin-top:2px;color:${statusColor}">${s.status==='completed'?'COMPLETED':'ONGOING · M'+s.completedMatches+'/'+s.totalMatches}</div></div><div style="text-align:right"><div class="hist-result" style="font-size:18px;font-family:var(--mono)">${wins[0]}–${wins[1]}</div></div></div>`;}).join('')}</div>`;
     }
   }catch(e){body.innerHTML='<div class="no-data">Could not load</div>';}
 }
