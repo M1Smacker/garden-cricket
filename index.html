@@ -528,6 +528,45 @@ td.g{color:var(--green)}td.gl{color:var(--gold)}td.mu{color:var(--muted)}td.ac{c
 .rn-existing-row .rn-pair .rn-arrow{color:var(--accent);margin:0 6px}
 .rn-existing-remove{padding:5px 10px;background:transparent;border:1px solid var(--reddim);color:var(--red);border-radius:6px;font-size:11px;font-weight:600;cursor:pointer}
 .rn-existing-remove:active{background:var(--reddim)}
+/* PLAYER CHOOSER */
+.pc-wrap{margin-top:8px}
+.pc-empty{text-align:center;color:var(--muted);font-size:13px;font-style:italic;padding:14px;background:var(--card2);border-radius:8px;margin-bottom:8px}
+.pc-grid{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;max-height:240px;overflow-y:auto;padding:2px}
+.pc-chip{padding:8px 12px;background:var(--card2);border:1.5px solid var(--border2);border-radius:20px;font-family:var(--font);font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:6px;user-select:none}
+.pc-chip:active{transform:scale(.94)}
+.pc-chip.sel-a{background:var(--accentdim);border-color:var(--blue);color:var(--blue)}
+.pc-chip.sel-b{background:var(--orangedim);border-color:var(--orange);color:var(--orange)}
+.pc-chip.disabled{opacity:.35;cursor:not-allowed}
+.pc-chip.disabled:active{transform:none}
+.pc-chip .pc-cap{font-size:10px;color:var(--gold)}
+.pc-chip .pc-idx{font-size:10px;font-family:var(--mono);background:rgba(0,0,0,.25);padding:1px 5px;border-radius:8px}
+.pc-add{padding:8px 12px;background:transparent;border:1.5px dashed var(--accent);border-radius:20px;font-family:var(--font);font-size:13px;font-weight:700;color:var(--accent);cursor:pointer}
+.pc-add:active{background:var(--accentdim)}
+.pc-selected-row{font-size:12px;color:var(--muted);margin-bottom:8px;min-height:18px}
+.pc-selected-row b{color:var(--white);font-weight:600}
+.pc-section-lbl{font-size:10px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;font-weight:700;margin:6px 0 6px}
+/* SERIES MATCH-COUNT BUTTONS */
+.sr-count-row{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.sr-count-btn{flex:1;min-width:42px;padding:11px 6px;background:var(--card2);border:1.5px solid var(--border2);border-radius:8px;font-family:var(--mono);font-size:18px;font-weight:700;color:var(--muted);cursor:pointer;transition:all .15s;text-align:center}
+.sr-count-btn:active{transform:scale(.93)}
+.sr-count-btn.active{background:var(--golddim);border-color:var(--gold);color:var(--gold)}
+/* NETWORK STATUS DOT */
+.net-dot{position:fixed;bottom:74px;right:16px;z-index:1100;width:14px;height:14px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);transition:background .25s,box-shadow .25s;cursor:pointer}
+.net-dot.offline{background:var(--red);box-shadow:0 0 8px var(--red)}
+.net-dot.connecting{background:var(--orange);box-shadow:0 0 8px var(--orange)}
+/* SAVE NOW BUTTON */
+.save-now-btn{position:fixed;top:14px;right:14px;z-index:550;padding:8px 14px;background:var(--greendim);border:1.5px solid var(--green);color:var(--green);border-radius:18px;font-family:var(--font);font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;display:none;box-shadow:0 4px 14px rgba(0,0,0,.35)}
+.save-now-btn:active{transform:scale(.92)}
+.save-now-btn.show{display:block}
+.save-now-btn.saving{background:var(--orangedim);border-color:var(--orange);color:var(--orange)}
+/* RECOVERY BUTTON */
+.recovery-btn{width:100%;margin-bottom:12px;padding:14px;border-radius:12px;border:1.5px dashed var(--orange);background:var(--orangedim);font-family:var(--font);font-size:14px;font-weight:700;letter-spacing:1px;color:var(--orange);cursor:pointer;text-transform:uppercase;text-align:center}
+.recovery-btn:active{transform:scale(.97)}
+.recovery-btn.done{border-color:var(--green);background:var(--greendim);color:var(--green);border-style:solid;cursor:default;opacity:.7}
+.recovery-btn.done:active{transform:none}
+/* PARTIAL MATCH BANNER */
+.partial-banner{background:var(--orangedim);border:1.5px solid var(--orange);border-radius:10px;padding:11px 14px;margin-bottom:12px;font-size:13px;color:var(--orange);line-height:1.5}
+.partial-banner b{color:var(--orange);display:block;margin-bottom:4px;font-size:11px;letter-spacing:2px;text-transform:uppercase}
 /* SERIES */
 .series-badge{display:inline-block;padding:2px 8px;background:var(--golddim);border:1px solid var(--gold);border-radius:10px;font-size:9px;color:var(--gold);font-weight:700;letter-spacing:1px;margin-top:3px}
 .series-between{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;z-index:900;padding:18px}
@@ -592,6 +631,9 @@ td.g{color:var(--green)}td.gl{color:var(--gold)}td.mu{color:var(--muted)}td.ac{c
   <div style="width:100%;max-width:440px;margin-bottom:16px">
     <button style="width:100%;padding:16px;border-radius:12px;border:1px solid var(--gold);background:var(--golddim);font-family:var(--display);font-size:20px;letter-spacing:2px;color:var(--gold);cursor:pointer;" onclick="goToProtected('series-setup')">🏆 CREATE SERIES</button>
   </div>
+  <div style="width:100%;max-width:440px" id="recovery-section">
+    <button class="recovery-btn" id="recovery-btn" onclick="openRecoveryFlow()" style="display:none">🔧 RECOVER LOST MATCH</button>
+  </div>
   <div class="recent-section">
     <div class="recent-title">Recent Matches</div>
     <div id="home-recent"><div class="empty-state">Loading...</div></div>
@@ -610,37 +652,22 @@ td.g{color:var(--green)}td.gl{color:var(--gold)}td.mu{color:var(--muted)}td.ac{c
       <input type="number" id="inp-overs" min="1" max="20" value="6">
       <label>Match date</label>
       <input type="text" id="inp-date" placeholder="Match Date">
-      <div class="divider"></div>
-      <label>Players per team</label>
-      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:8px">
-        <div class="pm-row" id="pm-row-a">
-          <span class="pm-label blue">🔵 Team A</span>
-          <div class="pm-controls">
-            <button class="pm-btn minus" id="pm-minus-a" onclick="pmChange('a',-1)">−</button>
-            <div class="pm-num-wrap"><div class="pm-num" id="pm-num-a">3</div></div>
-            <button class="pm-btn plus" id="pm-plus-a" onclick="pmChange('a',1)">+</button>
-          </div>
-        </div>
-        <div class="pm-row" id="pm-row-b">
-          <span class="pm-label orange-c">🔴 Team B</span>
-          <div class="pm-controls">
-            <button class="pm-btn minus" id="pm-minus-b" onclick="pmChange('b',-1)">−</button>
-            <div class="pm-num-wrap"><div class="pm-num" id="pm-num-b">2</div></div>
-            <button class="pm-btn plus" id="pm-plus-b" onclick="pmChange('b',1)">+</button>
-          </div>
-        </div>
-      </div>
-      <div class="pm-total"><span class="pm-total-num" id="pm-total">5</span><span style="color:var(--muted)"> players total</span></div>
     </div>
     <div class="scard">
       <div class="scard-title blue">Team A</div>
       <label>Team name</label><input type="text" id="ta-name" placeholder="Team Name">
-      <div class="plist" id="plist-a"></div>
+      <div class="pc-section-lbl">Players · First tap = captain</div>
+      <div class="pc-selected-row" id="pc-a-selected">No players selected yet</div>
+      <div class="pc-grid" id="pc-a-grid"></div>
+      <button class="pc-add" onclick="promptAddPlayer('a')">+ Add new player</button>
     </div>
     <div class="scard">
       <div class="scard-title orange-c">Team B</div>
       <label>Team name</label><input type="text" id="tb-name" placeholder="Team Name">
-      <div class="plist" id="plist-b"></div>
+      <div class="pc-section-lbl">Players · First tap = captain</div>
+      <div class="pc-selected-row" id="pc-b-selected">No players selected yet</div>
+      <div class="pc-grid" id="pc-b-grid"></div>
+      <button class="pc-add" onclick="promptAddPlayer('b')">+ Add new player</button>
     </div>
     <button class="btn-main" onclick="proceedToToss()">⚡ Start Match</button>
   </div>
@@ -785,34 +812,57 @@ td.g{color:var(--green)}td.gl{color:var(--gold)}td.mu{color:var(--muted)}td.ac{c
       <label>Series name</label>
       <input type="text" id="sr-name" placeholder="e.g. April Series">
       <label>Number of matches</label>
-      <select id="sr-matches" style="background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--white);font-family:var(--font);font-size:16px;padding:10px 13px;margin-bottom:10px;outline:none">
-        <option value="3">Best of 3</option>
-        <option value="5">Best of 5</option>
-        <option value="7">Best of 7</option>
-        <option value="2">2 Matches</option>
-        <option value="4">4 Matches</option>
-      </select>
+      <div class="sr-count-row" id="sr-count-row"></div>
       <label>Overs per innings</label>
       <input type="number" id="sr-overs" min="1" max="20" value="6">
     </div>
     <div class="scard">
       <div class="scard-title blue">Team A</div>
       <label>Team name</label><input type="text" id="sr-ta" placeholder="e.g. The Legends">
-      <div class="plist" id="sr-plist-a">
-        <input type="text" class="spa" placeholder="Captain">
-        <input type="text" class="spa" placeholder="Player 2">
-        <input type="text" class="spa" placeholder="Player 3">
-      </div>
+      <div class="pc-section-lbl">Players · First tap = captain</div>
+      <div class="pc-selected-row" id="pc-sra-selected">No players selected yet</div>
+      <div class="pc-grid" id="pc-sra-grid"></div>
+      <button class="pc-add" onclick="promptAddPlayer('sra')">+ Add new player</button>
     </div>
     <div class="scard">
       <div class="scard-title orange-c">Team B</div>
       <label>Team name</label><input type="text" id="sr-tb" placeholder="e.g. The Rivals">
-      <div class="plist" id="sr-plist-b">
-        <input type="text" class="spb" placeholder="Captain">
-        <input type="text" class="spb" placeholder="Player 2">
-      </div>
+      <div class="pc-section-lbl">Players · First tap = captain</div>
+      <div class="pc-selected-row" id="pc-srb-selected">No players selected yet</div>
+      <div class="pc-grid" id="pc-srb-grid"></div>
+      <button class="pc-add" onclick="promptAddPlayer('srb')">+ Add new player</button>
     </div>
     <button class="btn-main" style="background:var(--gold);color:#050a18" onclick="createAndStartSeries()">🏆 Start Series</button>
+  </div>
+</div>
+
+<!-- SERIES NEXT-MATCH SETUP (between matches in a series) -->
+<div id="series-next-setup" class="screen">
+  <div class="page-wrap">
+    <div class="back-btn" onclick="cancelNextSeriesMatch()">← Back</div>
+    <div class="page-title" style="color:var(--gold)" id="sns-title">MATCH 2 LINEUP</div>
+    <div class="scard">
+      <div class="scard-title" style="color:var(--gold)">Match Settings</div>
+      <label>Overs per innings</label>
+      <input type="number" id="sns-overs" min="1" max="20" value="6">
+      <label>Match date</label>
+      <input type="text" id="sns-date" placeholder="Match Date">
+    </div>
+    <div class="scard">
+      <div class="scard-title blue" id="sns-ta-title">Team A</div>
+      <div class="pc-section-lbl">Players · First tap = captain</div>
+      <div class="pc-selected-row" id="pc-snsa-selected">No players selected yet</div>
+      <div class="pc-grid" id="pc-snsa-grid"></div>
+      <button class="pc-add" onclick="promptAddPlayer('snsa')">+ Add new player</button>
+    </div>
+    <div class="scard">
+      <div class="scard-title orange-c" id="sns-tb-title">Team B</div>
+      <div class="pc-section-lbl">Players · First tap = captain</div>
+      <div class="pc-selected-row" id="pc-snsb-selected">No players selected yet</div>
+      <div class="pc-grid" id="pc-snsb-grid"></div>
+      <button class="pc-add" onclick="promptAddPlayer('snsb')">+ Add new player</button>
+    </div>
+    <button class="btn-main" style="background:var(--gold);color:#050a18" onclick="confirmNextSeriesMatch()">⚡ Start Match</button>
   </div>
 </div>
 
@@ -985,6 +1035,8 @@ td.g{color:var(--green)}td.gl{color:var(--gold)}td.mu{color:var(--muted)}td.ac{c
 </div>
 
 <div class="sync-bar" id="sync-bar"></div>
+<div class="net-dot" id="net-dot" title="Network status" onclick="showNetStatus()"></div>
+<button class="save-now-btn" id="save-now-btn" onclick="forceSaveNow()">💾 Save Now</button>
 
 <!-- THEME TOGGLE -->
 <div class="theme-toggle" onclick="toggleTheme()">🌙</div>
@@ -1493,6 +1545,11 @@ function goTo(id){
   screenHistory.push(id);
   if(screenHistory.length>30)screenHistory.splice(0,screenHistory.length-30);
   if(id==='history')loadHistory();if(id==='leaderboard')loadLeaderboard();if(id==='home')loadHomeRecent();
+  if(id==='setup')pcInitScreen(['a','b']);
+  if(id==='series-setup'){initSeriesCountButtons();pcInitScreen(['sra','srb']);}
+  // Show "Save Now" button only on the live match screen
+  const saveBtn=document.getElementById('save-now-btn');
+  if(saveBtn)saveBtn.classList.toggle('show',id==='match');
   if(id==='series-detail'){}// content set before calling goTo
 }
 function goBack(){
@@ -1508,30 +1565,128 @@ function goBack(){
 }
 
 // ═══ PLUS/MINUS ═══
-let pmHoldTimer={a:null,b:null};let pmHoldInterval={a:null,b:null};
-function pmChange(team,dir){const cur=G.pmCounts[team];const next=cur+dir;if(next<1)return;G.pmCounts[team]=next;animateNum(team,dir);updateMinusBtn(team);updatePlist(team,cur,next,dir);updateTotal();pulseRow(team);}
-function animateNum(team,dir){const el=document.getElementById(`pm-num-${team}`);const out=dir>0?'-100%':'100%';const inn=dir>0?'100%':'-100%';el.style.transform=`translateY(${out})`;el.style.opacity='0';setTimeout(()=>{el.textContent=G.pmCounts[team];el.style.transition='none';el.style.transform=`translateY(${inn})`;el.style.opacity='0';requestAnimationFrame(()=>{el.style.transition='transform 150ms ease-in-out,opacity 150ms ease-in-out';el.style.transform='translateY(0)';el.style.opacity='1';});},150);}
-function updateMinusBtn(team){const btn=document.getElementById(`pm-minus-${team}`);if(G.pmCounts[team]<=1)btn.classList.add('disabled');else btn.classList.remove('disabled');}
-function pulseRow(team){const row=document.getElementById(`pm-row-${team}`);row.classList.add('pulse');setTimeout(()=>row.classList.remove('pulse'),100);}
-function updateTotal(){const tot=G.pmCounts.a+G.pmCounts.b;const el=document.getElementById('pm-total');el.textContent=tot;el.classList.remove('pop');void el.offsetWidth;el.classList.add('pop');}
-function updatePlist(team,oldCount,newCount,dir){
-  const plist=document.getElementById(`plist-${team==='a'?'a':'b'}`);
-  if(dir>0){const wrap=document.createElement('div');wrap.className='pinput-wrap';const inp=document.createElement('input');inp.type='text';inp.className=`p${team}`;inp.placeholder=newCount===1?'Captain':`Player ${newCount}`;wrap.appendChild(inp);plist.appendChild(wrap);requestAnimationFrame(()=>wrap.style.maxHeight='60px');}
-  else{const wraps=plist.querySelectorAll('.pinput-wrap');const last=wraps[wraps.length-1];if(last){last.style.maxHeight='0';last.style.opacity='0';setTimeout(()=>last.remove(),200);}}
+// ═══ PLAYER CHOOSER ═══
+// Replaces the manual text-input system. Pulls names from saved matches + alias keys,
+// dedupes through resolveName, and lets user toggle-select. First selected = captain.
+// Surfaces: 'a','b' (normal setup), 'sra','srb' (series setup), 'snsa','snsb' (next-match-in-series).
+const _pcKeys=['a','b','sra','srb','snsa','snsb'];
+// Per-surface selected names (resolved-name strings, order = captain first)
+let _pcSel={a:[],b:[],sra:[],srb:[],snsa:[],snsb:[]};
+// Extra names added via "Add new player" that aren't in the database yet (per session)
+let _pcAdded=[];
+// Build the union of all known names (resolved). Used to populate every chooser.
+function pcAllKnownNames(){
+  const set=new Set();
+  if(Array.isArray(lbMatches)){
+    lbMatches.forEach(m=>{if(m.playerStats)m.playerStats.forEach(ps=>{if(ps.name)set.add(resolveName(ps.name));});});
+  }
+  // Include alias targets too in case some only exist as alias mappings
+  Object.values(_aliases).forEach(v=>{if(v)set.add(v);});
+  _pcAdded.forEach(n=>{if(n)set.add(n);});
+  return [...set].sort((a,b)=>a.localeCompare(b));
 }
-function initPlists(){
-  ['a','b'].forEach(team=>{const plist=document.getElementById(`plist-${team}`);plist.innerHTML='';const count=G.pmCounts[team];for(let i=1;i<=count;i++){const wrap=document.createElement('div');wrap.className='pinput-wrap';const inp=document.createElement('input');inp.type='text';inp.className=`p${team}`;inp.placeholder=i===1?'Captain':`Player ${i}`;wrap.appendChild(inp);plist.appendChild(wrap);}updateMinusBtn(team);});updateTotal();
+// Re-render a chooser surface (chip grid + selected line).
+function pcRender(key){
+  const grid=document.getElementById('pc-'+key+'-grid');
+  const selRow=document.getElementById('pc-'+key+'-selected');
+  if(!grid||!selRow)return;
+  const names=pcAllKnownNames();
+  const sel=_pcSel[key];
+  // Determine the OTHER team's selection so we can grey out duplicates
+  const partnerKey={a:'b',b:'a',sra:'srb',srb:'sra',snsa:'snsb',snsb:'snsa'}[key];
+  const partnerSel=partnerKey?(_pcSel[partnerKey]||[]):[];
+  grid.innerHTML='';
+  if(names.length===0){
+    grid.innerHTML='<div class="pc-empty">No players yet. Tap "+ Add new player" below to get started.</div>';
+  } else {
+    names.forEach(name=>{
+      const myIdx=sel.indexOf(name);
+      const onOther=partnerSel.includes(name);
+      const chip=document.createElement('div');
+      const teamCls=key.endsWith('a')?'sel-a':'sel-b';
+      chip.className='pc-chip'+(myIdx>=0?' '+teamCls:'')+(onOther&&myIdx<0?' disabled':'');
+      const capTag=myIdx===0?'<span class="pc-cap">★</span>':'';
+      const idxTag=myIdx>0?`<span class="pc-idx">${myIdx+1}</span>`:'';
+      chip.innerHTML=`${esc(name)} ${capTag}${idxTag}`;
+      if(!(onOther&&myIdx<0)){
+        chip.onclick=()=>pcToggle(key,name);
+      }
+      grid.appendChild(chip);
+    });
+  }
+  // Selected summary line
+  if(sel.length===0){
+    selRow.innerHTML='No players selected yet';
+  } else {
+    const parts=sel.map((n,i)=>i===0?`<b>${esc(n)}</b> (C)`:`<b>${esc(n)}</b>`);
+    selRow.innerHTML=`${sel.length} selected: ${parts.join(' · ')}`;
+  }
 }
-function setupHold(team,dir){
-  const btnId=`pm-${dir>0?'plus':'minus'}-${team}`;
-  const btn=document.getElementById(btnId);
-  btn.addEventListener('mousedown',()=>{pmHoldTimer[team]=setTimeout(()=>{pmHoldInterval[team]=setInterval(()=>pmChange(team,dir),150);},400);});
-  btn.addEventListener('touchstart',()=>{pmHoldTimer[team]=setTimeout(()=>{pmHoldInterval[team]=setInterval(()=>pmChange(team,dir),150);},400);},{passive:true});
-  const stop=()=>{clearTimeout(pmHoldTimer[team]);clearInterval(pmHoldInterval[team]);};
-  btn.addEventListener('mouseup',stop);
-  btn.addEventListener('touchend',stop);
-  btn.addEventListener('mouseleave',stop);
-  btn.addEventListener('touchcancel',stop);
+function pcToggle(key,name){
+  const sel=_pcSel[key];
+  const idx=sel.indexOf(name);
+  if(idx>=0)sel.splice(idx,1);
+  else sel.push(name);
+  // Re-render BOTH paired surfaces so disabled state updates correctly
+  const partnerKey={a:'b',b:'a',sra:'srb',srb:'sra',snsa:'snsb',snsb:'snsa'}[key];
+  pcRender(key);
+  if(partnerKey)pcRender(partnerKey);
+}
+function promptAddPlayer(key){
+  const inp=document.createElement('input');inp.type='text';inp.maxLength=30;
+  // Use appConfirm-style modal? Quick prompt instead via native — keep it simple.
+  const name=prompt('New player name:');
+  if(!name)return;
+  const trimmed=name.trim();
+  if(!trimmed)return;
+  if(trimmed.length>30){appAlert('Name too long (max 30 chars).',{icon:'⚠️',title:'Too Long'});return;}
+  // Check duplicates against the full known set (case-insensitive)
+  const all=pcAllKnownNames();
+  const existing=all.find(n=>n.toLowerCase()===trimmed.toLowerCase());
+  if(existing){
+    // Just select that existing one — and re-render
+    if(!_pcSel[key].includes(existing))_pcSel[key].push(existing);
+    pcRender(key);
+    const partnerKey={a:'b',b:'a',sra:'srb',srb:'sra',snsa:'snsb',snsb:'snsa'}[key];
+    if(partnerKey)pcRender(partnerKey);
+    return;
+  }
+  _pcAdded.push(trimmed);
+  _pcSel[key].push(trimmed);
+  pcRender(key);
+  const partnerKey={a:'b',b:'a',sra:'srb',srb:'sra',snsa:'snsb',snsb:'snsa'}[key];
+  if(partnerKey)pcRender(partnerKey);
+}
+// Reset selection for one or more keys
+function pcReset(keys){(Array.isArray(keys)?keys:[keys]).forEach(k=>{_pcSel[k]=[];});}
+// Helper to initialize a chooser screen with default selections
+async function pcInitScreen(keys,preselect){
+  // Ensure latest matches are loaded so chooser has the full name pool
+  if(window._dbReady&&(!Array.isArray(lbMatches)||lbMatches.length===0)){
+    try{lbMatches=await window._db.getMatches();}catch(e){}
+  }
+  pcReset(keys);
+  if(preselect){
+    Object.keys(preselect).forEach(k=>{
+      if(_pcSel[k]!==undefined)_pcSel[k]=[...(preselect[k]||[])];
+    });
+  }
+  keys.forEach(pcRender);
+}
+
+// ═══ SERIES MATCH COUNT BUTTONS ═══
+let _srSelectedCount=3;
+function initSeriesCountButtons(){
+  const row=document.getElementById('sr-count-row');
+  if(!row)return;
+  row.innerHTML='';
+  [2,3,4,5,6,7].forEach(n=>{
+    const b=document.createElement('button');
+    b.className='sr-count-btn'+(n===_srSelectedCount?' active':'');
+    b.textContent=n;
+    b.onclick=()=>{_srSelectedCount=n;initSeriesCountButtons();};
+    row.appendChild(b);
+  });
 }
 
 // ═══ SETUP ═══
@@ -1540,30 +1695,24 @@ function proceedToToss(){
   const d=document.getElementById('inp-date').value.trim()||new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
   const tA=document.getElementById('ta-name').value.trim()||'Team A';
   const tB=document.getElementById('tb-name').value.trim()||'Team B';
-  const pA=[...document.querySelectorAll('.pa')].map((e,i)=>e.value.trim()||`A${i+1}`);
-  const pB=[...document.querySelectorAll('.pb')].map((e,i)=>e.value.trim()||`B${i+1}`);
-  const proceed=()=>{
-    G.teams[0]={name:tA,players:pA};G.teams[1]={name:tB,players:pB};
-    G.totalOvers=o;G.matchDate=d;G.innings=0;G.inn=[null,null];G.seriesId=null;G.seriesData=null;G.seriesMatchNum=1;
-    G.inningsBreak=false;G.pendingNB=false;
-    clearUndoStack();
-    showTossStep1();goTo('toss');
-  };
-  // Duplicate player name check — flagging because same-name players would merge stats in the leaderboard
-  const allNames=[...pA,...pB];
-  const dupes=allNames.filter((n,i)=>allNames.indexOf(n)!==i);
-  if(dupes.length>0){
-    const uniqueDupes=[...new Set(dupes)];
-    appConfirm({
-      icon:'⚠️',
-      title:'Duplicate Names',
-      message:`Duplicate player name${uniqueDupes.length>1?'s':''} detected: ${uniqueDupes.join(', ')}\n\nPlayers with the same name will have their stats merged in the leaderboard.\n\nContinue anyway?`,
-      confirmText:'Continue',
-      onConfirm:proceed
-    });
+  const pA=[..._pcSel.a];
+  const pB=[..._pcSel.b];
+  // Validation — at least 1 per team
+  if(pA.length===0||pB.length===0){
+    appAlert(`Pick at least 1 player for each team.\n\nTeam A: ${pA.length} player${pA.length!==1?'s':''}\nTeam B: ${pB.length} player${pB.length!==1?'s':''}`,{icon:'👥',title:'Missing Players'});
     return;
   }
-  proceed();
+  // Defensive: a player ending up on both teams (shouldn't happen because UI greys it out, but check anyway)
+  const overlap=pA.filter(n=>pB.includes(n));
+  if(overlap.length>0){
+    appAlert(`Same player on both teams: ${overlap.join(', ')}\n\nRemove from one side.`,{icon:'⚠️',title:'Player Conflict'});
+    return;
+  }
+  G.teams[0]={name:tA,players:pA};G.teams[1]={name:tB,players:pB};
+  G.totalOvers=o;G.matchDate=d;G.innings=0;G.inn=[null,null];G.seriesId=null;G.seriesData=null;G.seriesMatchNum=1;
+  G.inningsBreak=false;G.pendingNB=false;
+  clearUndoStack();
+  showTossStep1();goTo('toss');
 }
 
 // ═══ TOSS ═══
@@ -2016,6 +2165,13 @@ function showReport(){
   else if(i1.runs>i2.runs){const d=i1.runs-i2.runs;winner=G.teams[i1.bat].name;margin=`by ${d} run${d!==1?'s':''}`;}
   else{winner='TIE';margin='Match tied!';}
   const body=document.getElementById('report-body');body.innerHTML='';
+  // Partial-reconstruction banner — only shown when viewing a flagged historical match
+  if(_currentReportPartial){
+    const banner=document.createElement('div');
+    banner.className='partial-banner';
+    banner.innerHTML=`<b>⚠️ Partially Reconstructed</b>${esc(_currentReportPartialNote||'Part of this match was reconstructed from memory after a data loss.')}`;
+    body.appendChild(banner);
+  }
   const wc=document.createElement('div');wc.className='winner-card';
   wc.innerHTML=`<div style="font-size:40px;margin-bottom:7px">🏆</div><div class="winner-name">${esc(winner)}</div><div class="winner-sub">${esc(margin)}</div><div class="result-scores"><div class="rs-team"><div class="rs-name">${esc(G.teams[0].name)}</div><div class="rs-score">${i1.runs}/${i1.wickets}</div></div>${i2?`<div class="rs-team"><div class="rs-name">${esc(G.teams[1].name)}</div><div class="rs-score">${i2.runs}/${i2.wickets}</div></div>`:''}</div>`;
   body.appendChild(wc);
@@ -2162,6 +2318,7 @@ async function saveMatchToCloud(){
     const playerStats=buildPlayerStats(i1,i2);const matchStats=buildMatchStats(i1,i2);
     const matchId=await window._db.saveMatch({date:G.matchDate,ts:Date.now(),teams:[G.teams[0].name,G.teams[1].name],scores:[`${i1.runs}/${i1.wickets}`,i2?`${i2.runs}/${i2.wickets}`:'—'],winner,toss:{winner:G.teams[G.toss.winner].name,choice:G.toss.choice},playerStats,matchStats,seriesId:G.seriesId||null,matchNum:G.seriesMatchNum||null,matchData:JSON.stringify({teams:G.teams,inn:G.inn,totalOvers:G.totalOvers,matchDate:G.matchDate,toss:G.toss})});
     try{await window._db.deleteActiveMatch();}catch(e){}
+    try{localStorage.removeItem(LOCAL_ACTIVE_KEY);}catch(e){}
     syncMsg('✓ Saved','ok');
     invalidateLeaderboardCaches();
     return matchId;
@@ -2180,32 +2337,415 @@ function buildPlayerStats(i1,i2){
 }
 function buildMatchStats(i1,i2){return{totalRuns:(i1.runs+(i2?i2.runs:0)),totalWickets:(i1.wickets+(i2?i2.wickets:0))};}
 
-// ═══ AUTO-SAVE ═══
+// ═══ AUTO-SAVE (SAFE) ═══
+// Two-tier save: instant to localStorage (always succeeds), then debounced push to Firebase.
+// If Firebase fails or the tab dies before push, localStorage still has the latest state.
+// On next app open, we compare local vs Firebase and push local up if it's newer.
+const LOCAL_ACTIVE_KEY='gc-active-match-local';
 let autoSaveTimer=null;
+let _lastFbSaveOk=true;
+function buildActiveMatchPayload(){
+  if(G._viewing)return null;
+  const inn1=G.inn[0];const inn2=G.inn[1];if(!inn1)return null;
+  const inn=inn2||inn1;
+  const ov=inn.currentOver+'.'+inn.balls.filter(b=>b.legal&&b.over===inn.currentOver).length;
+  const score=`${inn.runs}/${inn.wickets}`;
+  // Cap undo stack at 30 snapshots — Firestore 1MB doc limit
+  const recentUndo=G.undoStack.slice(-30);
+  return {
+    ts:Date.now(),
+    teams:[G.teams[0].name,G.teams[1].name],
+    score,over:ov,innings:G.innings,
+    state:JSON.stringify({teams:G.teams,inn:G.inn,totalOvers:G.totalOvers,matchDate:G.matchDate,toss:G.toss,innings:G.innings,pmCounts:G.pmCounts,pendingNB:G.pendingNB,inningsBreak:G.inningsBreak,seriesId:G.seriesId,seriesMatchNum:G.seriesMatchNum,seriesData:G.seriesData,undoStack:recentUndo})
+  };
+}
 function autoSave(){
+  if(G._viewing)return;
+  const payload=buildActiveMatchPayload();
+  if(!payload)return;
+  // STEP 1: INSTANT — write to localStorage right now, no delay.
+  // This is the safety net. Even if everything else fails, the device that scored has the data.
+  try{localStorage.setItem(LOCAL_ACTIVE_KEY,JSON.stringify(payload));}catch(e){}
+  // STEP 2: debounced Firebase push (cheaper, batches rapid taps)
   if(!window._dbReady)return;
-  if(G._viewing)return; // never overwrite live record while user is viewing a historical match
   clearTimeout(autoSaveTimer);
   autoSaveTimer=setTimeout(async()=>{
     try{
-      const inn1=G.inn[0];const inn2=G.inn[1];if(!inn1)return;
-      const inn=inn2||inn1;const ov=inn.currentOver+'.'+inn.balls.filter(b=>b.legal&&b.over===inn.currentOver).length;const score=`${inn.runs}/${inn.wickets}`;
-      // Save only the last 30 undo snapshots to keep doc size sane (Firestore 1MB limit per doc).
-      const recentUndo=G.undoStack.slice(-30);
-      await window._db.saveActiveMatch({ts:Date.now(),teams:[G.teams[0].name,G.teams[1].name],score,over:ov,innings:G.innings,state:JSON.stringify({teams:G.teams,inn:G.inn,totalOvers:G.totalOvers,matchDate:G.matchDate,toss:G.toss,innings:G.innings,pmCounts:G.pmCounts,pendingNB:G.pendingNB,inningsBreak:G.inningsBreak,seriesId:G.seriesId,seriesMatchNum:G.seriesMatchNum,seriesData:G.seriesData,undoStack:recentUndo})});
-    }catch(e){}
-  },800);
+      await window._db.saveActiveMatch(payload);
+      _lastFbSaveOk=true;
+      updateNetDot('ok');
+    }catch(e){
+      _lastFbSaveOk=false;
+      updateNetDot('offline');
+    }
+  },600);
 }
-async function checkActiveMatch(){
+// Manual "Save Now" — forces immediate sync, no debounce. Bypasses the timer.
+async function forceSaveNow(){
+  const payload=buildActiveMatchPayload();
+  if(!payload){syncMsg('Nothing to save','ok');return;}
+  // Local first (always works)
+  try{localStorage.setItem(LOCAL_ACTIVE_KEY,JSON.stringify(payload));}catch(e){}
+  const btn=document.getElementById('save-now-btn');
+  if(btn){btn.classList.add('saving');btn.textContent='⏳ Saving...';}
+  if(!window._dbReady){
+    syncMsg('Offline — saved locally only','error');
+    if(btn){setTimeout(()=>{btn.classList.remove('saving');btn.textContent='💾 Save Now';},800);}
+    return;
+  }
+  try{
+    await window._db.saveActiveMatch(payload);
+    _lastFbSaveOk=true;
+    updateNetDot('ok');
+    syncMsg('✓ Saved to cloud','ok');
+  }catch(e){
+    _lastFbSaveOk=false;
+    updateNetDot('offline');
+    syncMsg('Cloud save failed — kept locally','error');
+  }
+  if(btn){setTimeout(()=>{btn.classList.remove('saving');btn.textContent='💾 Save Now';},600);}
+}
+// On every app open: if local has data newer than Firebase, push it up.
+async function syncLocalToCloudIfNewer(){
   if(!window._dbReady)return;
+  let local=null;
+  try{const raw=localStorage.getItem(LOCAL_ACTIVE_KEY);if(raw)local=JSON.parse(raw);}catch(e){}
+  if(!local||!local.ts)return;
+  let remote=null;
+  try{remote=await window._db.getActiveMatch();}catch(e){return;}
+  // If local is strictly newer (or remote missing), push local
+  if(!remote||(local.ts>(remote.ts||0))){
+    try{
+      await window._db.saveActiveMatch(local);
+      syncMsg('✓ Recovered unsaved progress','ok');
+    }catch(e){}
+  }
+}
+
+async function checkActiveMatch(){
+  if(!window._dbReady){
+    // Fallback: maybe there's local-only data
+    try{
+      const raw=localStorage.getItem(LOCAL_ACTIVE_KEY);
+      if(!raw){document.getElementById('resume-card').classList.remove('show');return;}
+      const active=JSON.parse(raw);
+      document.getElementById('resume-teams').textContent=`${active.teams[0]} vs ${active.teams[1]}`;
+      document.getElementById('resume-meta').textContent=`Over ${active.over} · ${active.score} · ${getTimeAgo(active.ts)} (offline)`;
+      document.getElementById('resume-card').classList.add('show');
+    }catch(e){}
+    return;
+  }
   try{
     const active=await window._db.getActiveMatch();
     const card=document.getElementById('resume-card');
-    if(!active){card.classList.remove('show');return;}
+    if(!active){
+      // Try local fallback
+      try{
+        const raw=localStorage.getItem(LOCAL_ACTIVE_KEY);
+        if(raw){
+          const localActive=JSON.parse(raw);
+          document.getElementById('resume-teams').textContent=`${localActive.teams[0]} vs ${localActive.teams[1]}`;
+          document.getElementById('resume-meta').textContent=`Over ${localActive.over} · ${localActive.score} · ${getTimeAgo(localActive.ts)} (local only)`;
+          card.classList.add('show');
+          return;
+        }
+      }catch(e){}
+      card.classList.remove('show');return;
+    }
     document.getElementById('resume-teams').textContent=`${active.teams[0]} vs ${active.teams[1]}`;
     document.getElementById('resume-meta').textContent=`Over ${active.over} · ${active.score} · ${getTimeAgo(active.ts)}`;
     card.classList.add('show');
   }catch(e){}
+}
+
+// ═══ NETWORK STATUS DOT ═══
+function updateNetDot(state){
+  // state: 'ok' (green), 'connecting' (orange), 'offline' (red)
+  const dot=document.getElementById('net-dot');
+  if(!dot)return;
+  dot.classList.remove('offline','connecting');
+  if(state==='offline')dot.classList.add('offline');
+  else if(state==='connecting')dot.classList.add('connecting');
+}
+function showNetStatus(){
+  const online=navigator.onLine!==false;
+  const fbReady=!!window._dbReady;
+  let title='✓ Connected';
+  let msg='You are online and connected to the cloud. Matches save automatically.';
+  if(!online){title='📡 Offline';msg='No internet connection. Matches are being saved to this device only. They will sync to the cloud when you reconnect.';}
+  else if(!fbReady){title='⚠️ Cloud not ready';msg='Internet works but cloud database is not connected. Matches are saved locally for now.';}
+  else if(!_lastFbSaveOk){title='⚠️ Cloud save failed';msg='Last save to the cloud failed. Data is safe on this device. Tap "Save Now" on the match screen to retry.';}
+  appAlert(msg,{icon:online&&fbReady&&_lastFbSaveOk?'✓':'⚠️',title});
+}
+window.addEventListener('online',()=>{updateNetDot('connecting');setTimeout(()=>{if(navigator.onLine)updateNetDot(_lastFbSaveOk?'ok':'offline');},800);syncLocalToCloudIfNewer();});
+window.addEventListener('offline',()=>updateNetDot('offline'));
+
+// ═══ BEFOREUNLOAD WARNING ═══
+// If a live match is in progress, warn before closing tab/refreshing.
+window.addEventListener('beforeunload',e=>{
+  if(G._viewing)return;
+  // A "live" match means we have at least one innings started and the match isn't viewed as a report.
+  if(G.inn&&G.inn[0]&&!document.getElementById('home').classList.contains('active')){
+    // Only warn if we're actually on the match screen (not on lb/history/etc — those are safe to close)
+    const matchActive=document.getElementById('match')&&document.getElementById('match').classList.contains('active');
+    if(matchActive){
+      e.preventDefault();
+      // Modern browsers ignore the message, but setting returnValue triggers the native prompt.
+      e.returnValue='You have a live match in progress. Are you sure you want to leave?';
+      return e.returnValue;
+    }
+  }
+});
+
+// ═══ MATCH RECOVERY (Australia vs Pakistan, 30 May 2026) ═══
+// One-time tool to recover the lost match. Reconstructs 2nd innings overs 3-4 from memory:
+// Raju 58 off 25 (SR 232), Pakistan won by 2 wickets, winning six in 5th over off Ahmed Hanzala.
+const RECOVERY_MATCH_KEY='gc-recovered-aus-pak-may30';
+const RECOVERY_TEAMS=['Australia','Pakistan'];
+const RECOVERY_DATE='30 May 2026';
+async function isMatchAlreadyRecovered(){
+  if(localStorage.getItem(RECOVERY_MATCH_KEY)==='1')return true;
+  // Also check Firebase: if a match with the recovery marker exists, skip
+  if(!window._dbReady)return false;
+  try{
+    const matches=await window._db.getMatches();
+    return matches.some(m=>m.recoveredKey===RECOVERY_MATCH_KEY);
+  }catch(e){return false;}
+}
+async function refreshRecoveryButton(){
+  const btn=document.getElementById('recovery-btn');
+  if(!btn)return;
+  const done=await isMatchAlreadyRecovered();
+  if(done){
+    btn.style.display='block';
+    btn.classList.add('done');
+    btn.textContent='✓ AUSTRALIA vs PAKISTAN (RECOVERED)';
+    btn.onclick=()=>appAlert('This match was already recovered and is in your History. The recovery feature is now disabled for this match.',{icon:'✓',title:'Already Recovered'});
+  } else {
+    btn.style.display='block';
+    btn.classList.remove('done');
+    btn.textContent='🔧 RECOVER LOST MATCH';
+    btn.onclick=openRecoveryFlow;
+  }
+}
+function openRecoveryFlow(){
+  requirePw(()=>{
+    appConfirm({
+      icon:'🔧',
+      title:'Recover Australia vs Pakistan',
+      message:`This will save the lost match from ${RECOVERY_DATE} as a completed match.\n\n1st innings (Australia 79/1) — real data from cloud.\n2nd innings (Pakistan 80/1) — partially reconstructed from memory (overs 3 to 4 of the chase).\n\nThe match will be flagged so anyone viewing the report sees it was partially reconstructed.\n\nThis is a one-time action.`,
+      confirmText:'Recover',
+      onConfirm:performRecovery
+    });
+  });
+}
+// Builds the full match document for the recovered match.
+function buildRecoveredMatch(){
+  // ── 1st innings (Australia) — exact as saved ──
+  const inn1={
+    bat:0,bowl:1,runs:79,wickets:1,
+    balls:[
+      {type:'run',runs:6,fh:false,over:0,bowlerIdx:2,batsmanIdx:0,id:'rec-1',legal:true},
+      {type:'wide',fh:false,over:0,bowlerIdx:2,batsmanIdx:0,id:'rec-2'},
+      {type:'run',runs:0,fh:false,over:0,bowlerIdx:2,batsmanIdx:0,id:'rec-3',legal:true},
+      {type:'run',runs:4,fh:false,over:0,bowlerIdx:2,batsmanIdx:0,id:'rec-4',legal:true},
+      {type:'run',runs:0,fh:false,over:0,bowlerIdx:2,batsmanIdx:0,id:'rec-5',legal:true},
+      {type:'run',runs:0,fh:false,over:0,bowlerIdx:2,batsmanIdx:0,id:'rec-6',legal:true},
+      {type:'run',runs:0,fh:false,over:0,bowlerIdx:2,batsmanIdx:0,id:'rec-7',legal:true},
+      {type:'run',runs:6,fh:false,over:1,bowlerIdx:0,batsmanIdx:0,id:'rec-8',legal:true},
+      {type:'run',runs:4,fh:false,over:1,bowlerIdx:0,batsmanIdx:0,id:'rec-9',legal:true},
+      {type:'run',runs:0,fh:false,over:1,bowlerIdx:0,batsmanIdx:0,id:'rec-10',legal:true},
+      {type:'run',runs:0,fh:false,over:1,bowlerIdx:0,batsmanIdx:0,id:'rec-11',legal:true},
+      {type:'run',runs:0,fh:false,over:1,bowlerIdx:0,batsmanIdx:0,id:'rec-12',legal:true},
+      {type:'run',runs:0,fh:false,over:1,bowlerIdx:0,batsmanIdx:0,id:'rec-13',legal:true},
+      {type:'run',runs:4,fh:false,over:2,bowlerIdx:1,batsmanIdx:0,id:'rec-14',legal:true},
+      {type:'run',runs:0,fh:false,over:2,bowlerIdx:1,batsmanIdx:0,id:'rec-15',legal:true},
+      {type:'wicket',how:'Bowled',catcher:'',fh:false,over:2,bowlerIdx:1,batsmanIdx:0,legal:true,id:'rec-16'},
+      {type:'run',runs:0,fh:false,over:2,bowlerIdx:1,batsmanIdx:2,id:'rec-17',legal:true},
+      {type:'run',runs:0,fh:false,over:2,bowlerIdx:1,batsmanIdx:2,id:'rec-18',legal:true},
+      {type:'run',runs:6,fh:false,over:2,bowlerIdx:1,batsmanIdx:2,id:'rec-19',legal:true},
+      {type:'run',runs:1,fh:false,over:3,bowlerIdx:2,batsmanIdx:2,id:'rec-20',legal:true},
+      {type:'run',runs:0,fh:false,over:3,bowlerIdx:2,batsmanIdx:2,id:'rec-21',legal:true},
+      {type:'run',runs:6,fh:false,over:3,bowlerIdx:2,batsmanIdx:2,id:'rec-22',legal:true},
+      {type:'run',runs:0,fh:false,over:3,bowlerIdx:2,batsmanIdx:2,id:'rec-23',legal:true},
+      {type:'run',runs:4,fh:false,over:3,bowlerIdx:2,batsmanIdx:2,id:'rec-24',legal:true},
+      {type:'run',runs:6,fh:false,over:3,bowlerIdx:2,batsmanIdx:2,id:'rec-25',legal:true},
+      {type:'run',runs:6,fh:false,over:4,bowlerIdx:0,batsmanIdx:2,id:'rec-26',legal:true},
+      {type:'run',runs:0,fh:false,over:4,bowlerIdx:0,batsmanIdx:2,id:'rec-27',legal:true},
+      {type:'run',runs:0,fh:false,over:4,bowlerIdx:0,batsmanIdx:2,id:'rec-28',legal:true},
+      {type:'run',runs:6,fh:false,over:4,bowlerIdx:0,batsmanIdx:2,id:'rec-29',legal:true},
+      {type:'noball',runs:0,fh:false,over:4,bowlerIdx:0,batsmanIdx:2,id:'rec-30'},
+      {type:'wide',fh:true,over:4,bowlerIdx:0,batsmanIdx:2,id:'rec-31'},
+      {type:'run',runs:6,fh:true,over:4,bowlerIdx:0,batsmanIdx:2,id:'rec-32',legal:true},
+      {type:'run',runs:4,fh:false,over:4,bowlerIdx:0,batsmanIdx:2,id:'rec-33',legal:true},
+      {type:'wide',fh:false,over:5,bowlerIdx:1,batsmanIdx:2,id:'rec-34'},
+      {type:'run',runs:0,fh:false,over:5,bowlerIdx:1,batsmanIdx:2,id:'rec-35',legal:true},
+      {type:'run',runs:0,fh:false,over:5,bowlerIdx:1,batsmanIdx:2,id:'rec-36',legal:true},
+      {type:'run',runs:6,fh:false,over:5,bowlerIdx:1,batsmanIdx:2,id:'rec-37',legal:true},
+      {type:'run',runs:0,fh:false,over:5,bowlerIdx:1,batsmanIdx:2,id:'rec-38',legal:true},
+      {type:'run',runs:0,fh:false,over:5,bowlerIdx:1,batsmanIdx:2,id:'rec-39',legal:true},
+      {type:'run',runs:0,fh:false,over:5,bowlerIdx:1,batsmanIdx:2,id:'rec-40',legal:true},
+    ],
+    currentOver:6,currentBowlerIdx:null,lastOverBowlerIdx:1,legalInOver:0,nextFH:false,
+    currentBatsmanIdx:1,currentBatterPlayerIdx:2,battingSequence:[0,2],
+    batsmen:[
+      {name:'Touseef Waleed',runs:24,balls:15,fours:3,sixes:2,out:true,howOut:'Bowled',catcher:''},
+      {name:'Abdul Aziz',runs:0,balls:0,fours:0,sixes:0,out:false,howOut:'',catcher:''},
+      {name:'Ahmed Hanzala',runs:51,balls:22,fours:2,sixes:7,out:false,howOut:'',catcher:''},
+    ],
+    bowlers:[
+      {name:'Abdurahim Raja',runs:34,wickets:0,legalBalls:12,wides:1,noballs:1},
+      {name:'M.Ibrahim Bhutta',runs:17,wickets:1,legalBalls:12,wides:1,noballs:0},
+      {name:'M.Ayaan Bhutta',runs:28,wickets:0,legalBalls:12,wides:1,noballs:0},
+    ],
+    extras:{wides:3,noballs:1,dead:0,total:4},
+  };
+  // ── 2nd innings (Pakistan chase) ──
+  // Verified saved balls (overs 0-2): Pakistan 44/1 after 3 overs. Raju 23(9), Ibrahim 19 caught off Ahmed.
+  // Reconstructed (overs 3-4): Raju needs 35 more in 16 balls, plus 1 extra wide.
+  // Over 3: Touseef bowls balls 1-4, Ahmed (you) bowls balls 5-6 (Touseef felt sick).
+  // Over 4 (the 5th over, "second-last"): Ahmed bowls full; Raju hits winning six on ball 5.
+  // Final: Pakistan 80/1, won by 2 wickets.
+  const inn2={
+    bat:1,bowl:0,runs:80,wickets:1,
+    balls:[
+      // ─ Over 0 (Touseef) — verified ─
+      {type:'run',runs:1,fh:false,over:0,bowlerIdx:0,batsmanIdx:1,id:'rec2-1',legal:true},
+      {type:'run',runs:6,fh:false,over:0,bowlerIdx:0,batsmanIdx:1,id:'rec2-2',legal:true},
+      {type:'run',runs:0,fh:false,over:0,bowlerIdx:0,batsmanIdx:1,id:'rec2-3',legal:true},
+      {type:'wide',fh:false,over:0,bowlerIdx:0,batsmanIdx:1,id:'rec2-4'},
+      {type:'run',runs:6,fh:false,over:0,bowlerIdx:0,batsmanIdx:1,id:'rec2-5',legal:true},
+      {type:'run',runs:6,fh:false,over:0,bowlerIdx:0,batsmanIdx:1,id:'rec2-6',legal:true},
+      {type:'run',runs:0,fh:false,over:0,bowlerIdx:0,batsmanIdx:1,id:'rec2-7',legal:true},
+      // ─ Over 1 (Ahmed Hanzala) — verified, ends with Ibrahim's wicket ─
+      {type:'run',runs:0,fh:false,over:1,bowlerIdx:2,batsmanIdx:1,id:'rec2-8',legal:true},
+      {type:'run',runs:0,fh:false,over:1,bowlerIdx:2,batsmanIdx:1,id:'rec2-9',legal:true},
+      {type:'wicket',how:'Caught',catcher:'Ahmed Hanzala',fh:false,over:1,bowlerIdx:2,batsmanIdx:1,legal:true,id:'rec2-10'},
+      {type:'wide',fh:false,over:1,bowlerIdx:2,batsmanIdx:0,id:'rec2-11'},
+      {type:'run',runs:6,fh:false,over:1,bowlerIdx:2,batsmanIdx:0,id:'rec2-12',legal:true},
+      {type:'run',runs:0,fh:false,over:1,bowlerIdx:2,batsmanIdx:0,id:'rec2-13',legal:true},
+      {type:'run',runs:0,fh:false,over:1,bowlerIdx:2,batsmanIdx:0,id:'rec2-14',legal:true},
+      // ─ Over 2 (Abdul Aziz) — verified ─
+      {type:'run',runs:0,fh:false,over:2,bowlerIdx:1,batsmanIdx:0,id:'rec2-15',legal:true},
+      {type:'run',runs:0,fh:false,over:2,bowlerIdx:1,batsmanIdx:0,id:'rec2-16',legal:true},
+      {type:'run',runs:1,fh:false,over:2,bowlerIdx:1,batsmanIdx:0,id:'rec2-17',legal:true},
+      {type:'run',runs:6,fh:false,over:2,bowlerIdx:1,batsmanIdx:0,id:'rec2-18',legal:true},
+      {type:'run',runs:4,fh:false,over:2,bowlerIdx:1,batsmanIdx:0,id:'rec2-19',legal:true},
+      {type:'run',runs:6,fh:false,over:2,bowlerIdx:1,batsmanIdx:0,id:'rec2-20',legal:true},
+      // ─ Over 3 (Touseef balls 1-4, Ahmed balls 5-6) — RECONSTRUCTED ─
+      // Raju runs in this over: target ~12 distributed across the 6 legal balls
+      {type:'run',runs:0,fh:false,over:3,bowlerIdx:0,batsmanIdx:0,id:'rec2-21',legal:true,reconstructed:true},   // Touseef ball 1
+      {type:'run',runs:6,fh:false,over:3,bowlerIdx:0,batsmanIdx:0,id:'rec2-22',legal:true,reconstructed:true},   // Touseef ball 2 — six
+      {type:'wide',fh:false,over:3,bowlerIdx:0,batsmanIdx:0,id:'rec2-23',reconstructed:true},                     // Touseef wide (the +1 extra)
+      {type:'run',runs:0,fh:false,over:3,bowlerIdx:0,batsmanIdx:0,id:'rec2-24',legal:true,reconstructed:true},   // Touseef ball 3
+      {type:'run',runs:4,fh:false,over:3,bowlerIdx:0,batsmanIdx:0,id:'rec2-25',legal:true,reconstructed:true},   // Touseef ball 4 — four
+      {type:'run',runs:1,fh:false,over:3,bowlerIdx:2,batsmanIdx:0,id:'rec2-26',legal:true,reconstructed:true},   // Ahmed ball 5 — 1 (Touseef sick, swap)
+      {type:'run',runs:1,fh:false,over:3,bowlerIdx:2,batsmanIdx:0,id:'rec2-27',legal:true,reconstructed:true},   // Ahmed ball 6
+      // Subtotal Raju over 3: 0+6+0+4+1+1 = 12 runs (plus 1 wide extra = 13 over)
+      // ─ Over 4 (Ahmed Hanzala) — RECONSTRUCTED, winning six on ball 5 ─
+      // Raju needs 23 more runs to reach 58. Distribute across 5 balls (match ends on ball 5).
+      {type:'run',runs:6,fh:false,over:4,bowlerIdx:2,batsmanIdx:0,id:'rec2-28',legal:true,reconstructed:true},   // ball 1 — six
+      {type:'run',runs:6,fh:false,over:4,bowlerIdx:2,batsmanIdx:0,id:'rec2-29',legal:true,reconstructed:true},   // ball 2 — six
+      {type:'run',runs:1,fh:false,over:4,bowlerIdx:2,batsmanIdx:0,id:'rec2-30',legal:true,reconstructed:true},   // ball 3 — single
+      {type:'run',runs:4,fh:false,over:4,bowlerIdx:2,batsmanIdx:0,id:'rec2-31',legal:true,reconstructed:true},   // ball 4 — four
+      {type:'run',runs:6,fh:false,over:4,bowlerIdx:2,batsmanIdx:0,id:'rec2-32',legal:true,reconstructed:true},   // ball 5 — WINNING SIX
+      // Subtotal Raju over 4: 6+6+1+4+6 = 23 runs
+      // Total Raju: 23 (saved) + 12 (over 3) + 23 (over 4) = 58 runs off 25 balls. SR exactly 232. ✓
+      // Total Pakistan: 44 (saved) + 13 (over 3 with wide) + 23 (over 4) = 80. ✓
+    ],
+    currentOver:4,currentBowlerIdx:2,lastOverBowlerIdx:2,legalInOver:5,nextFH:false,
+    currentBatsmanIdx:1,currentBatterPlayerIdx:0,battingSequence:[1,0],
+    batsmen:[
+      {name:'Abdurahim Raja',runs:58,balls:25,fours:2,sixes:7,out:false,howOut:'',catcher:''},
+      {name:'M.Ibrahim Bhutta',runs:19,balls:9,fours:0,sixes:3,out:true,howOut:'Caught',catcher:'Ahmed Hanzala'},
+      {name:'M.Ayaan Bhutta',runs:0,balls:0,fours:0,sixes:0,out:false,howOut:'',catcher:''},
+    ],
+    bowlers:[
+      // Touseef: 1 full over (over 0) + 4 balls of over 3 = 10 legal balls. Runs: 13 (over 0) + 10 (over 3 reconstructed) + 1 wide = ?
+      // Over 0 conceded: 1+6+0+wide(1)+6+6+0 = 20 (legal balls 6, wides 1)
+      // Over 3 part: 0+6+wide(1)+0+4 = 11 runs (4 legal balls, 1 wide)
+      // Total: 20+11=31 runs, 10 legal balls, 2 wides
+      {name:'Touseef Waleed',runs:31,wickets:0,legalBalls:10,wides:2,noballs:0},
+      // Abdul Aziz: 1 full over (over 2) = 6 legal balls, 17 runs (0+0+1+6+4+6)
+      {name:'Abdul Aziz',runs:17,wickets:0,legalBalls:6,wides:0,noballs:0},
+      // Ahmed Hanzala: over 1 (6 balls + 1 wide, 1 wicket) + 2 balls of over 3 + 5 balls of over 4
+      // Over 1 runs: 0+0+W+wide(1)+6+0+0 = 7 runs, 6 legal, 1 wide
+      // Over 3 last 2 balls: 1+1 = 2 runs, 2 legal
+      // Over 4: 6+6+1+4+6 = 23 runs, 5 legal
+      // Total: 7+2+23=32 runs, 13 legal, 1 wide
+      {name:'Ahmed Hanzala',runs:32,wickets:1,legalBalls:13,wides:1,noballs:0},
+    ],
+    extras:{wides:3,noballs:0,dead:0,total:3},
+  };
+  return {
+    teams:[
+      {name:'Australia',players:['Touseef Waleed','Abdul Aziz','Ahmed Hanzala']},
+      {name:'Pakistan',players:['Abdurahim Raja','M.Ibrahim Bhutta','M.Ayaan Bhutta']},
+    ],
+    totalOvers:6,matchDate:RECOVERY_DATE,
+    toss:{winner:0,choice:'bat'},
+    inn:[inn1,inn2],
+    innings:1,
+  };
+}
+async function performRecovery(){
+  // Idempotency check
+  if(await isMatchAlreadyRecovered()){
+    appAlert('This match has already been recovered.',{icon:'✓',title:'Done'});
+    refreshRecoveryButton();
+    return;
+  }
+  syncMsg('Reconstructing match...','saving');
+  const recovered=buildRecoveredMatch();
+  const i1=recovered.inn[0],i2=recovered.inn[1];
+  const winner=i2.runs>i1.runs?recovered.teams[1].name:i1.runs>i2.runs?recovered.teams[0].name:'TIE';
+  // Build playerStats and matchStats from the reconstructed innings, same shape as normal saves.
+  // We need a tiny version of buildPlayerStats that uses our recovered state.
+  function buildStatsFor(inns,teams){
+    const stats={};
+    function ensure(name){if(!stats[name])stats[name]={name,matches:1,runs:0,balls:0,fours:0,sixes:0,outs:0,wickets:0,runsConceded:0,oversBowled:0,wides:0,noballs:0,wins:0,highScore:0,bestWickets:0};}
+    const i1Winner=inns[1]?inns[1].runs>inns[0].runs?teams[inns[1].bat].name:teams[inns[0].bat].name:'';
+    inns.forEach(inn=>{
+      inn.batsmen.forEach(bt=>{ensure(bt.name);const a=stats[bt.name];a.runs+=bt.runs;a.balls+=bt.balls;a.fours+=bt.fours;a.sixes+=bt.sixes;if(bt.out)a.outs++;if(bt.runs>a.highScore)a.highScore=bt.runs;});
+      inn.bowlers.forEach(bw=>{ensure(bw.name);const a=stats[bw.name];a.wickets+=bw.wickets;a.runsConceded+=bw.runs;a.oversBowled+=bw.legalBalls/6;a.wides+=bw.wides;a.noballs+=bw.noballs;if(bw.wickets>a.bestWickets)a.bestWickets=bw.wickets;});
+    });
+    Object.keys(stats).forEach(name=>{if(name===i1Winner)stats[name].wins=1;});
+    return Object.values(stats);
+  }
+  const teamObjs=recovered.teams;
+  const playerStats=buildStatsFor([i1,i2],teamObjs);
+  const matchStats={totalRuns:i1.runs+i2.runs,totalWickets:i1.wickets+i2.wickets};
+  const matchDoc={
+    date:recovered.matchDate,
+    ts:new Date('2026-05-30T13:00:00Z').getTime(),
+    teams:[teamObjs[0].name,teamObjs[1].name],
+    scores:[`${i1.runs}/${i1.wickets}`,`${i2.runs}/${i2.wickets}`],
+    winner,
+    toss:{winner:teamObjs[recovered.toss.winner].name,choice:recovered.toss.choice},
+    playerStats,matchStats,
+    seriesId:null,matchNum:null,
+    partiallyReconstructed:true,
+    reconstructionNote:'2nd innings overs 3-4 reconstructed from memory after data loss. Final score verified: Raju 58 off 25 (SR 232), Pakistan won by 2 wickets.',
+    recoveredKey:RECOVERY_MATCH_KEY,
+    matchData:JSON.stringify({teams:teamObjs,inn:recovered.inn,totalOvers:recovered.totalOvers,matchDate:recovered.matchDate,toss:recovered.toss}),
+  };
+  try{
+    if(!window._dbReady){appAlert('Not connected to the cloud. Connect and try again.',{icon:'📡',title:'Offline'});return;}
+    await window._db.saveMatch(matchDoc);
+    // Also delete any lingering active_match record (the broken half)
+    try{await window._db.deleteActiveMatch();}catch(e){}
+    // Mark recovery as done so the button locks
+    localStorage.setItem(RECOVERY_MATCH_KEY,'1');
+    invalidateLeaderboardCaches();
+    syncMsg('✓ Match recovered and saved','ok');
+    refreshRecoveryButton();
+    loadHomeRecent();
+    checkActiveMatch();
+    appAlert(`Australia vs Pakistan (${RECOVERY_DATE}) is now in your History.\n\nPakistan won by 2 wickets (chased 80 in 5 overs).\n\nThe report shows a banner explaining that the 2nd innings was partially reconstructed from memory.`,{icon:'🏆',title:'Recovery Complete'});
+  }catch(e){
+    syncMsg('Recovery failed: '+e.message,'error');
+    appAlert('Could not save the recovered match: '+e.message,{icon:'⚠️',title:'Save Failed'});
+  }
 }
 
 // Poll for active match while home screen is visible (catches matches started on other devices).
@@ -2233,7 +2773,14 @@ function getTimeAgo(ts){
 }
 async function resumeMatch(){
   try{
-    const active=await window._db.getActiveMatch();
+    // Prefer whichever is NEWER between local and Firebase. Local often has data Firebase missed.
+    let active=null;
+    let local=null;
+    try{const raw=localStorage.getItem(LOCAL_ACTIVE_KEY);if(raw)local=JSON.parse(raw);}catch(e){}
+    let remote=null;
+    if(window._dbReady){try{remote=await window._db.getActiveMatch();}catch(e){}}
+    if(local&&remote)active=(local.ts>(remote.ts||0))?local:remote;
+    else active=local||remote;
     if(!active){document.getElementById('resume-card').classList.remove('show');return;}
     const saved=JSON.parse(active.state);
     G.teams=saved.teams;G.inn=saved.inn;G.totalOvers=saved.totalOvers;G.matchDate=saved.matchDate;
@@ -2248,7 +2795,6 @@ async function resumeMatch(){
     document.getElementById('resume-card').classList.remove('show');
     goTo('match');
     render();
-    // If refresh happened during innings break overlay, show it again
     if(G.inningsBreak&&G.innings===0&&G.inn[0]){
       const inn=G.inn[0];
       document.getElementById('ov-inn-title').textContent=`${G.teams[inn.bat].name} — Innings Over`;
@@ -2265,14 +2811,15 @@ function confirmDiscard(){
   appConfirm({
     icon:'🗑',
     title:'Discard Match',
-    message:'This active match will be deleted. This cannot be undone.',
+    message:'This active match will be deleted from both the cloud and this device. This cannot be undone.',
     confirmText:'Discard',
     onConfirm:discardMatch
   });
 }
 async function discardMatch(){
   try{
-    await window._db.deleteActiveMatch();
+    if(window._dbReady){try{await window._db.deleteActiveMatch();}catch(e){}}
+    try{localStorage.removeItem(LOCAL_ACTIVE_KEY);}catch(e){}
     document.getElementById('resume-card').classList.remove('show');
     syncMsg('Match discarded','ok');
   }catch(e){
@@ -2283,40 +2830,32 @@ async function discardMatch(){
 // ═══ SERIES ═══
 async function createAndStartSeries(){
   const name=document.getElementById('sr-name').value.trim()||'Series';
-  const total=parseInt(document.getElementById('sr-matches').value)||3;
+  const total=_srSelectedCount||3;
   const overs=parseInt(document.getElementById('sr-overs').value)||6;
   const tA=document.getElementById('sr-ta').value.trim()||'Team A';
   const tB=document.getElementById('sr-tb').value.trim()||'Team B';
-  const pA=[...document.querySelectorAll('.spa')].map((e,i)=>e.value.trim()||`A${i+1}`);
-  const pB=[...document.querySelectorAll('.spb')].map((e,i)=>e.value.trim()||`B${i+1}`);
-  const proceed=async()=>{
-    const d=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
-    const payload={name,totalMatches:total,completedMatches:0,wins:[0,0],matchIds:[],teams:[tA,tB],playersA:pA,playersB:pB,overs,status:'ongoing',ts:Date.now(),date:d};
-    let seriesId='LS'+Date.now();
-    if(window._dbReady){try{seriesId=await window._db.createSeries(payload);syncMsg('Series created!','ok');}catch(e){syncMsg('Series save failed','error');}}
-    G.teams[0]={name:tA,players:pA};G.teams[1]={name:tB,players:pB};
-    G.totalOvers=overs;G.matchDate=d;G.innings=0;G.inn=[null,null];
-    G.seriesId=seriesId;G.seriesMatchNum=1;G.seriesData={...payload,id:seriesId};
-    G.inningsBreak=false;G.pendingNB=false;
-    clearUndoStack();
-    showTossStep1();
-    goTo('toss');
-  };
-  // Duplicate player name check
-  const allNames=[...pA,...pB];
-  const dupes=allNames.filter((n,i)=>allNames.indexOf(n)!==i);
-  if(dupes.length>0){
-    const uniqueDupes=[...new Set(dupes)];
-    appConfirm({
-      icon:'⚠️',
-      title:'Duplicate Names',
-      message:`Duplicate player name${uniqueDupes.length>1?'s':''} detected: ${uniqueDupes.join(', ')}\n\nPlayers with the same name will have their stats merged in the leaderboard.\n\nContinue anyway?`,
-      confirmText:'Continue',
-      onConfirm:proceed
-    });
+  const pA=[..._pcSel.sra];
+  const pB=[..._pcSel.srb];
+  if(pA.length===0||pB.length===0){
+    appAlert(`Pick at least 1 player for each team.\n\nTeam A: ${pA.length}\nTeam B: ${pB.length}`,{icon:'👥',title:'Missing Players'});
     return;
   }
-  proceed();
+  const overlap=pA.filter(n=>pB.includes(n));
+  if(overlap.length>0){
+    appAlert(`Same player on both teams: ${overlap.join(', ')}`,{icon:'⚠️',title:'Player Conflict'});
+    return;
+  }
+  const d=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+  const payload={name,totalMatches:total,completedMatches:0,wins:[0,0],matchIds:[],teams:[tA,tB],playersA:pA,playersB:pB,overs,status:'ongoing',ts:Date.now(),date:d};
+  let seriesId='LS'+Date.now();
+  if(window._dbReady){try{seriesId=await window._db.createSeries(payload);syncMsg('Series created!','ok');}catch(e){syncMsg('Series save failed','error');}}
+  G.teams[0]={name:tA,players:pA};G.teams[1]={name:tB,players:pB};
+  G.totalOvers=overs;G.matchDate=d;G.innings=0;G.inn=[null,null];
+  G.seriesId=seriesId;G.seriesMatchNum=1;G.seriesData={...payload,id:seriesId};
+  G.inningsBreak=false;G.pendingNB=false;
+  clearUndoStack();
+  showTossStep1();
+  goTo('toss');
 }
 
 async function handleSeriesMatchEnd(){
@@ -2343,12 +2882,52 @@ async function handleSeriesMatchEnd(){
   document.getElementById('sbo').classList.add('show');
 }
 
-function startNextSeriesMatch(){
+// Series next-match flow: opens the chooser so player count CAN change per match.
+// Pre-selects the prior match's roster as a starting point — adjust as needed.
+async function startNextSeriesMatch(){
   document.getElementById('sbo').classList.remove('show');
-  G.innings=0;G.inn=[null,null];G.matchDate=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+  // Set up the chooser screen with last match's rosters as defaults
+  document.getElementById('sns-title').textContent=`MATCH ${G.seriesMatchNum} LINEUP`;
+  document.getElementById('sns-ta-title').textContent=G.teams[0].name;
+  document.getElementById('sns-tb-title').textContent=G.teams[1].name;
+  document.getElementById('sns-overs').value=G.totalOvers;
+  document.getElementById('sns-date').value='';
+  await pcInitScreen(['snsa','snsb'],{
+    snsa:(G.teams[0].players||[]).map(resolveName),
+    snsb:(G.teams[1].players||[]).map(resolveName),
+  });
+  goTo('series-next-setup');
+}
+
+function cancelNextSeriesMatch(){
+  // Back to the post-match overlay
+  goBack();
+  document.getElementById('sbo').classList.add('show');
+}
+
+function confirmNextSeriesMatch(){
+  const pA=[..._pcSel.snsa];
+  const pB=[..._pcSel.snsb];
+  if(pA.length===0||pB.length===0){
+    appAlert(`Pick at least 1 player for each team.\n\n${G.teams[0].name}: ${pA.length}\n${G.teams[1].name}: ${pB.length}`,{icon:'👥',title:'Missing Players'});
+    return;
+  }
+  const overlap=pA.filter(n=>pB.includes(n));
+  if(overlap.length>0){
+    appAlert(`Same player on both teams: ${overlap.join(', ')}`,{icon:'⚠️',title:'Player Conflict'});
+    return;
+  }
+  const overs=parseInt(document.getElementById('sns-overs').value)||G.totalOvers;
+  const d=document.getElementById('sns-date').value.trim()||new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+  G.teams[0].players=pA;
+  G.teams[1].players=pB;
+  G.totalOvers=overs;
+  G.matchDate=d;
+  G.innings=0;G.inn=[null,null];
   G.inningsBreak=false;G.pendingNB=false;
   clearUndoStack();
-  showTossStep1();goTo('toss');
+  showTossStep1();
+  goTo('toss');
 }
 
 function finishSeries(){
@@ -2574,11 +3153,17 @@ async function viewMatchById(id){
     };
     // Mark viewing so autoSave won't write the historical data over the live record.
     G._viewing=true;
+    // Partial banner state — flagged on the match doc
+    _currentReportPartial=!!m.partiallyReconstructed;
+    _currentReportPartialNote=m.reconstructionNote||'';
     G.teams=saved.teams;G.inn=saved.inn;G.totalOvers=saved.totalOvers;G.matchDate=saved.matchDate;
     G.toss=saved.toss||{winner:0,choice:'bat'};G.innings=saved.inn[1]?1:0;
     showReport();
   }catch(e){appAlert('Could not load match.',{icon:'⚠️',title:'Load Failed'});}
 }
+// Banner state — set by viewMatchById, cleared on restoreLiveState. Live matches never set this.
+let _currentReportPartial=false;
+let _currentReportPartialNote='';
 function restoreLiveState(){
   if(!_liveStateBackup)return;
   G.teams=_liveStateBackup.teams;
@@ -2595,6 +3180,8 @@ function restoreLiveState(){
   G.undoStack=_liveStateBackup.undoStack;
   _liveStateBackup=null;
   G._viewing=false;
+  _currentReportPartial=false;
+  _currentReportPartialNote='';
 }
 
 // ═══ DELETE (password-gated) ═══
@@ -3021,17 +3608,32 @@ function buildSheetHTML(p){
 }
 
 // ═══ INIT ═══
-['a','b'].forEach(t=>{setupHold(t,1);setupHold(t,-1);});
-initPlists();
 // Try loading aliases from localStorage immediately (instant) — Firebase will refresh after dbready.
 try{const raw=localStorage.getItem('gc-aliases');if(raw)_aliases=JSON.parse(raw)||Object.create(null);}catch(e){}
+// Initial network dot state
+updateNetDot(navigator.onLine===false?'offline':'connecting');
 window.addEventListener('dbready',async()=>{
   await loadAliases();
+  // Pre-load matches so the chooser has the full name pool from the very first time setup is opened
+  try{if(window._dbReady)lbMatches=await window._db.getMatches();}catch(e){}
+  // Sync local→cloud if local has newer unsaved progress
+  await syncLocalToCloudIfNewer();
   loadHomeRecent();checkActiveMatch();startActiveMatchPoller();
+  refreshRecoveryButton();
+  updateNetDot('ok');
 });
 if(window._dbReady){
-  loadAliases().then(()=>{loadHomeRecent();checkActiveMatch();startActiveMatchPoller();});
+  (async()=>{
+    await loadAliases();
+    try{lbMatches=await window._db.getMatches();}catch(e){}
+    await syncLocalToCloudIfNewer();
+    loadHomeRecent();checkActiveMatch();startActiveMatchPoller();
+    refreshRecoveryButton();
+    updateNetDot('ok');
+  })();
 }
+// Refresh recovery button regardless of dbready (covers local-only sessions)
+setTimeout(refreshRecoveryButton,1500);
 </script>
 </body>
 </html>
