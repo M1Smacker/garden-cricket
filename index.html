@@ -363,7 +363,7 @@ td.g{color:var(--green)}td.gl{color:var(--gold)}td.mu{color:var(--muted)}td.ac{c
 .tab-bar{position:relative;display:flex;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:4px;margin-bottom:14px;gap:0}
 .tab{flex:1;padding:9px;text-align:center;border-radius:7px;font-size:13px;font-weight:700;letter-spacing:1px;color:var(--muted);cursor:pointer;transition:color 200ms;text-transform:uppercase;position:relative;z-index:1}
 .tab.active{color:var(--accent)}
-.tab-indicator{position:absolute;top:4px;bottom:4px;left:4px;width:calc(33.33% - 4px);background:var(--accentdim);border:1px solid var(--accent);border-radius:7px;transition:transform 250ms cubic-bezier(.4,0,.2,1);z-index:0}
+.tab-indicator{position:absolute;top:4px;bottom:4px;left:4px;width:calc(25% - 4px);background:var(--accentdim);border:1px solid var(--accent);border-radius:7px;transition:transform 250ms cubic-bezier(.4,0,.2,1);z-index:0}
 .tab-content-wrap{overflow:hidden;position:relative}
 .tab-content{display:none;animation:tabSlide 200ms ease-out both}
 .tab-content.active{display:block}
@@ -501,6 +501,8 @@ td.g{color:var(--green)}td.gl{color:var(--gold)}td.mu{color:var(--muted)}td.ac{c
 .ac-btn{padding:13px;border-radius:10px;font-family:var(--font);font-size:15px;font-weight:700;letter-spacing:1px;cursor:pointer;border:none;text-transform:uppercase}
 .ac-btn.ok{background:var(--red);color:#fff}
 .ac-btn.ok.safe{background:var(--accent);color:#050a18}
+.ac-btn.ok.danger{background:var(--red);color:#fff}
+.ac-btns{flex-wrap:wrap}
 .ac-btn.cancel{background:transparent;border:1.5px solid var(--border2);color:var(--muted)}
 /* RENAME PLAYER MODAL — flow modal styling (blur + glow) */
 .rn-overlay{position:fixed;inset:0;background:rgba(0,0,0,0);display:none;align-items:center;justify-content:center;z-index:1320;padding:20px;transition:background .28s ease-out;-webkit-backdrop-filter:blur(0);backdrop-filter:blur(0)}
@@ -631,7 +633,10 @@ td.g{color:var(--green)}td.gl{color:var(--gold)}td.mu{color:var(--muted)}td.ac{c
   <div style="width:100%;max-width:440px;margin-bottom:16px">
     <button style="width:100%;padding:16px;border-radius:12px;border:1px solid var(--gold);background:var(--golddim);font-family:var(--display);font-size:20px;letter-spacing:2px;color:var(--gold);cursor:pointer;" onclick="goToProtected('series-setup')">🏆 CREATE SERIES</button>
   </div>
-  <div style="width:100%;max-width:440px" id="recovery-section">
+  <div style="width:100%;max-width:440px;margin-bottom:16px">
+    <button style="width:100%;padding:16px;border-radius:12px;border:1px solid var(--green);background:var(--greendim);font-family:var(--display);font-size:20px;letter-spacing:2px;color:var(--green);cursor:pointer;" onclick="goToProtected('tenover-setup')">🏏 10-OVER MATCH</button>
+  </div>
+  <div style="width:100%;max-width:440px;display:none" id="recovery-section">
     <button class="recovery-btn" id="recovery-btn" onclick="openRecoveryFlow()" style="display:none">🔧 RECOVER LOST MATCH</button>
   </div>
   <div class="recent-section">
@@ -716,6 +721,10 @@ td.g{color:var(--green)}td.gl{color:var(--gold)}td.mu{color:var(--muted)}td.ac{c
         <div class="batter-name" id="m-batsman">—</div>
         <div class="batter-stats">Runs: <span id="m-bat-runs">0</span> · Balls: <span id="m-bat-balls">0</span> · SR: <span id="m-bat-sr">—</span></div>
       </div>
+      <div class="batter-row tenover-only" id="m-nonstriker-row" style="display:none;border-top:1px solid var(--border);margin-top:8px;padding-top:8px">
+        <div class="batter-name" id="m-nonstriker" style="font-size:14px;opacity:.85">—</div>
+        <div class="batter-stats" id="m-nonstriker-stats">at non-striker end</div>
+      </div>
     </div>
     <div class="panel">
       <div class="panel-title">Select Bowler</div>
@@ -730,6 +739,10 @@ td.g{color:var(--green)}td.gl{color:var(--gold)}td.mu{color:var(--muted)}td.ac{c
         <button class="rbtn" onclick="addBall({type:'run',runs:0})">·</button>
         <button class="rbtn b1" onclick="addBall({type:'run',runs:1})">1</button>
         <button class="rbtn b4" onclick="addBall({type:'run',runs:4})">4</button>
+      </div>
+      <div class="runs-grid tenover-only" id="rg-23" style="display:none">
+        <button class="rbtn b1" onclick="addBall({type:'run',runs:2})">2</button>
+        <button class="rbtn b1" onclick="addBall({type:'run',runs:3})">3</button>
       </div>
       <div style="display:grid;grid-template-columns:1fr;gap:7px;margin-bottom:7px">
         <button class="rbtn b6" style="font-size:32px" onclick="addBall({type:'run',runs:6})">6</button>
@@ -750,6 +763,9 @@ td.g{color:var(--green)}td.gl{color:var(--gold)}td.mu{color:var(--muted)}td.ac{c
         <button class="dbtn db-bowled" onclick="wicket('Bowled')">🎯 Bowled</button>
         <button class="dbtn db-caught" onclick="wicket('Caught')">Caught</button>
         <button class="dbtn db-declare" onclick="wicket('Retired')">🙋 Declares Himself Out</button>
+      </div>
+      <div class="dismiss-grid tenover-only" id="dg-runout" style="display:none;margin-top:7px">
+        <button class="dbtn db-caught" style="background:var(--red);color:#fff" onclick="wicket('RunOut')">🏃 Run Out</button>
       </div>
     </div>
     <div class="panel" style="padding:0;overflow:hidden">
@@ -866,7 +882,67 @@ td.g{color:var(--green)}td.gl{color:var(--gold)}td.mu{color:var(--muted)}td.ac{c
   </div>
 </div>
 
-<!-- SERIES DETAIL -->
+<!-- 10-OVER MATCH SETUP -->
+<div id="tenover-setup" class="screen">
+  <div class="page-wrap">
+    <div class="back-btn" onclick="goBack()">← Back</div>
+    <div class="page-title" style="color:var(--green)">10-OVER MATCH</div>
+    <div class="scard">
+      <div class="scard-title" style="color:var(--green)">Match Settings</div>
+      <div style="background:var(--card2);padding:11px 13px;border-radius:8px;margin-bottom:10px;font-size:13px;line-height:1.55;color:var(--muted)">
+        <b style="color:var(--green)">Special rules:</b><br>
+        • 10 overs · Single match (no series)<br>
+        • Running between wickets — 1, 2, 3 runs<br>
+        • Double-wicket players get a 2nd life<br>
+        • Run Outs with assist tracking<br>
+        • Max 3 players per team
+      </div>
+      <label>Match date</label>
+      <input type="text" id="to-date" placeholder="Match Date">
+    </div>
+    <div class="scard">
+      <div class="scard-title blue">Team A</div>
+      <label>Team name</label><input type="text" id="to-ta-name" placeholder="Team Name">
+      <div class="pc-section-lbl">Players · First tap = captain · Max 3</div>
+      <div class="pc-selected-row" id="pc-toa-selected">No players selected yet</div>
+      <div class="pc-grid" id="pc-toa-grid"></div>
+      <button class="pc-add" onclick="promptAddPlayer('toa')">+ Add new player</button>
+    </div>
+    <div class="scard">
+      <div class="scard-title orange-c">Team B</div>
+      <label>Team name</label><input type="text" id="to-tb-name" placeholder="Team Name">
+      <div class="pc-section-lbl">Players · First tap = captain · Max 3</div>
+      <div class="pc-selected-row" id="pc-tob-selected">No players selected yet</div>
+      <div class="pc-grid" id="pc-tob-grid"></div>
+      <button class="pc-add" onclick="promptAddPlayer('tob')">+ Add new player</button>
+    </div>
+    <button class="btn-main" style="background:var(--green);color:#050a18" onclick="proceedToDWAssign()">→ Next: Wicket Assignment</button>
+  </div>
+</div>
+
+<!-- DOUBLE-WICKET ASSIGNMENT -->
+<div id="dw-assign" class="screen">
+  <div class="page-wrap">
+    <div class="back-btn" onclick="goBack()">← Back</div>
+    <div class="page-title" style="color:var(--green)">DOUBLE WICKETS</div>
+    <div style="background:var(--card2);padding:11px 13px;border-radius:8px;margin-bottom:14px;font-size:13px;line-height:1.55;color:var(--muted)">
+      Pick which players on each team get <b style="color:var(--gold)">2 wickets</b>. They get a second chance after being dismissed once. Other players get the normal 1 wicket.
+    </div>
+    <div class="scard" id="dw-card-a">
+      <div class="scard-title blue" id="dw-team-a-title">Team A</div>
+      <div class="pc-section-lbl" id="dw-a-instructions">Tap players to mark as double-wicket</div>
+      <div class="pc-grid" id="dw-a-grid"></div>
+      <div class="pc-selected-row" id="dw-a-status"></div>
+    </div>
+    <div class="scard" id="dw-card-b">
+      <div class="scard-title orange-c" id="dw-team-b-title">Team B</div>
+      <div class="pc-section-lbl" id="dw-b-instructions">Tap players to mark as double-wicket</div>
+      <div class="pc-grid" id="dw-b-grid"></div>
+      <div class="pc-selected-row" id="dw-b-status"></div>
+    </div>
+    <button class="btn-main" id="dw-confirm-btn" style="background:var(--green);color:#050a18" onclick="confirmDWAndStart()">⚡ Start Match</button>
+  </div>
+</div>
 <div id="series-detail" class="screen">
   <div class="page-wrap">
     <div class="back-btn" onclick="goBack()">← Back</div>
@@ -925,11 +1001,13 @@ td.g{color:var(--green)}td.gl{color:var(--gold)}td.mu{color:var(--muted)}td.ac{c
       <div class="tab active" id="tab-batting" onclick="switchTab('batting',0)">BATTING</div>
       <div class="tab" id="tab-bowling" onclick="switchTab('bowling',1)">BOWLING</div>
       <div class="tab" id="tab-allround" onclick="switchTab('allround',2)">ALL-ROUND</div>
+      <div class="tab" id="tab-fielding" onclick="switchTab('fielding',3)">FIELDING</div>
     </div>
     <div class="tab-content-wrap">
       <div class="tab-content active" id="tc-batting"></div>
       <div class="tab-content" id="tc-bowling"></div>
       <div class="tab-content" id="tc-allround"></div>
+      <div class="tab-content" id="tc-fielding"></div>
     </div>
   </div>
 </div>
@@ -958,6 +1036,34 @@ td.g{color:var(--green)}td.gl{color:var(--gold)}td.mu{color:var(--muted)}td.ac{c
     <div class="modal-title">Caught Out — Who caught it?</div>
     <div id="catcher-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px"></div>
     <button class="mbtn cancel" style="width:100%" onclick="closeCaughtModal()">Cancel</button>
+  </div>
+</div>
+
+<!-- Run Out modal (tenover mode) -->
+<div class="modal" id="mod-runout">
+  <div class="modal-box">
+    <div class="modal-title">Run Out</div>
+    <div class="pc-section-lbl" style="margin-top:0">Who threw it? (assist)</div>
+    <div class="pc-grid" id="ro-thrower-grid" style="max-height:140px"></div>
+    <div class="pc-section-lbl" style="margin-top:8px">Who completed the run out?</div>
+    <div class="pc-grid" id="ro-completer-grid" style="max-height:140px"></div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.45">Tip: tap the same player in both lists if it was a direct hit (no assist).</div>
+    <div style="display:flex;gap:8px">
+      <button class="mbtn cancel" style="flex:1" onclick="closeRunOutModal()">Cancel</button>
+      <button class="mbtn confirm" style="flex:1;background:var(--red);color:#fff" onclick="confirmRunOut()">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- Double-Wicket choice modal -->
+<div class="modal" id="mod-dwchoice">
+  <div class="modal-box">
+    <div class="modal-title" id="dwc-title">Double Wicket — Choice</div>
+    <div id="dwc-msg" style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.5"></div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button class="mbtn confirm" id="dwc-btn-continue" style="background:var(--gold);color:#050a18" onclick="dwChoice('continue')">Use 2nd Wicket (continue)</button>
+      <button class="mbtn confirm" id="dwc-btn-swap" style="background:var(--accent);color:#050a18" onclick="dwChoice('swap')">Send in SW Player</button>
+    </div>
   </div>
 </div>
 
@@ -1000,8 +1106,9 @@ td.g{color:var(--green)}td.gl{color:var(--gold)}td.mu{color:var(--muted)}td.ac{c
     <div class="ac-icon" id="ac-icon">⚠️</div>
     <div class="ac-title" id="ac-title">Are you sure?</div>
     <div class="ac-msg" id="ac-msg"></div>
-    <div class="ac-btns">
+    <div class="ac-btns" id="ac-btns-row">
       <button class="ac-btn cancel" id="ac-btn-cancel" onclick="appConfirmCancel()">Cancel</button>
+      <button class="ac-btn ok" id="ac-btn-extra" onclick="appConfirmExtra()" style="display:none">Extra</button>
       <button class="ac-btn ok" id="ac-btn-ok" onclick="appConfirmOk()">Confirm</button>
     </div>
   </div>
@@ -1091,9 +1198,27 @@ td.g{color:var(--green)}td.gl{color:var(--gold)}td.mu{color:var(--muted)}td.ac{c
       async saveMatch(d){const r=await db.collection('matches').add(d);return r.id;},
       async getMatches(){const s=await db.collection('matches').orderBy('ts','desc').limit(200).get();return s.docs.map(d=>({id:d.id,...d.data()}));},
       async getMatch(id){const s=await db.collection('matches').doc(id).get();return s.exists?{id:s.id,...s.data()}:null;},
-      async saveActiveMatch(d){await db.collection('active_match').doc(window._deviceId||'current').set(d);},
-      async getActiveMatch(){const s=await db.collection('active_match').doc(window._deviceId||'current').get();return s.exists?s.data():null;},
-      async deleteActiveMatch(){await db.collection('active_match').doc(window._deviceId||'current').delete();},
+      // GLOBAL active match — one shared slot all phones see. Was previously per-device which caused matches
+      // to be invisible to other phones in the group. The fixed doc id is 'current'.
+      async saveActiveMatch(d){await db.collection('active_match').doc('current').set(d);},
+      async getActiveMatch(){const s=await db.collection('active_match').doc('current').get();return s.exists?s.data():null;},
+      async deleteActiveMatch(){await db.collection('active_match').doc('current').delete();},
+      // Migration: if a per-device doc exists from the old system, promote it to 'current' and delete the old one.
+      // Runs once on app open. Safe to retry (idempotent — if current already exists with newer data, we keep that).
+      async migrateLegacyActiveMatch(){
+        const myDeviceId=window._deviceId;
+        if(!myDeviceId||myDeviceId==='current')return;
+        try{
+          const legacyDoc=await db.collection('active_match').doc(myDeviceId).get();
+          if(!legacyDoc.exists)return;
+          const legacy=legacyDoc.data();
+          const currentDoc=await db.collection('active_match').doc('current').get();
+          if(!currentDoc.exists||((legacy.ts||0)>(currentDoc.data().ts||0))){
+            await db.collection('active_match').doc('current').set(legacy);
+          }
+          await db.collection('active_match').doc(myDeviceId).delete();
+        }catch(e){}
+      },
       async createSeries(d){const r=await db.collection('series').add(d);return r.id;},
       async updateSeries(id,d){await db.collection('series').doc(id).update(d);},
       async updateMatch(id,d){await db.collection('matches').doc(id).update(d);},
@@ -1194,14 +1319,67 @@ document.addEventListener('keydown',e=>{
   else if(e.key==='Escape'){e.preventDefault();closePwModal();}
 });
 // Gated navigation helpers
-function goToProtected(screenId){requirePw(()=>goTo(screenId));}
+// Protected nav to a setup screen. Before going to NEW MATCH or NEW SERIES setup,
+// we check if there's already an active match in Firebase. If yes, we ask the user what to do
+// (continue, discard and start new, or cancel) — prevents accidental overwrites when two phones
+// might try to start matches at the same time.
+async function goToProtected(screenId){
+  // Only need conflict-check for the two screens that BEGIN a new match flow
+  const matchStartScreens=['setup','series-setup'];
+  if(matchStartScreens.includes(screenId)){
+    requirePw(async()=>{
+      const active=await fetchActiveMatchAny();
+      if(active){
+        showActiveMatchConflictModal(active,screenId);
+      } else {
+        goTo(screenId);
+      }
+    });
+    return;
+  }
+  requirePw(()=>goTo(screenId));
+}
+// Helper — fetch active match from EITHER Firebase or localStorage, whichever is newer.
+async function fetchActiveMatchAny(){
+  let local=null,remote=null;
+  try{const raw=localStorage.getItem(LOCAL_ACTIVE_KEY);if(raw)local=JSON.parse(raw);}catch(e){}
+  if(window._dbReady){try{remote=await window._db.getActiveMatch();}catch(e){}}
+  if(local&&remote)return (local.ts>(remote.ts||0))?local:remote;
+  return local||remote||null;
+}
+// Modal shown when starting new match but one's already in progress
+function showActiveMatchConflictModal(active,intendedScreen){
+  const teams=`${active.teams[0]} vs ${active.teams[1]}`;
+  const meta=`Over ${active.over} · ${active.score} · ${getTimeAgo(active.ts)}`;
+  appConfirm({
+    icon:'⚠️',
+    title:'Active Match in Progress',
+    message:`An active match is already saved:\n\n${teams}\n${meta}\n\nWhat do you want to do?`,
+    confirmText:'Continue that match',
+    cancelText:'Cancel',
+    onConfirm:()=>{resumeMatch();},
+    onCancel:()=>{}, // do nothing
+    extraButton:{
+      text:'Discard & start new',
+      style:'danger',
+      onClick:async()=>{
+        // Password-gate the discard (delete) action — see discardActiveWithPw
+        discardActiveWithPw(async()=>{
+          goTo(intendedScreen);
+        });
+      }
+    }
+  });
+}
 
 // ═══ APP CONFIRM MODAL ═══
 // Reusable replacement for native confirm() — works in iframes, mobile webviews, all contexts.
 let _acCallback=null;
+let _acCancelCallback=null;
+let _acExtraCallback=null;
 let _acMode='confirm'; // 'confirm' or 'alert'
 function appConfirm(opts){
-  // opts = {title, message, confirmText, cancelText, icon, danger, onConfirm}
+  // opts = {title, message, confirmText, cancelText, icon, danger, onConfirm, onCancel, extraButton:{text,style,onClick}}
   const o=opts||{};
   _acMode='confirm';
   document.getElementById('ac-icon').textContent=o.icon||'⚠️';
@@ -1213,23 +1391,42 @@ function appConfirm(opts){
   const cancelBtn=document.getElementById('ac-btn-cancel');
   cancelBtn.textContent=o.cancelText||'Cancel';
   cancelBtn.style.display=''; // restore in case appAlert hid it earlier
+  const extraBtn=document.getElementById('ac-btn-extra');
+  if(o.extraButton){
+    extraBtn.style.display='';
+    extraBtn.textContent=o.extraButton.text||'Extra';
+    extraBtn.className='ac-btn ok'+(o.extraButton.style==='danger'?' danger':'');
+    _acExtraCallback=o.extraButton.onClick||null;
+  } else {
+    extraBtn.style.display='none';
+    _acExtraCallback=null;
+  }
   _acCallback=o.onConfirm||null;
+  _acCancelCallback=o.onCancel||null;
   document.getElementById('ac-overlay').classList.add('show');
 }
 function appConfirmOk(){
   const cb=_acCallback;
   document.getElementById('ac-overlay').classList.remove('show');
-  _acCallback=null;
+  _acCallback=null;_acCancelCallback=null;_acExtraCallback=null;
+  if(cb)cb();
+}
+function appConfirmExtra(){
+  const cb=_acExtraCallback;
+  document.getElementById('ac-overlay').classList.remove('show');
+  _acCallback=null;_acCancelCallback=null;_acExtraCallback=null;
   if(cb)cb();
 }
 function appConfirmCancel(){
   // For appAlert, Escape should still fire the onClose callback (consistent with Enter).
-  // For appConfirm, Escape cancels without callback.
+  // For appConfirm, Escape cancels and fires onCancel if provided.
   const wasAlert=_acMode==='alert';
   const cb=_acCallback;
+  const cancelCb=_acCancelCallback;
   document.getElementById('ac-overlay').classList.remove('show');
-  _acCallback=null;
+  _acCallback=null;_acCancelCallback=null;_acExtraCallback=null;
   if(wasAlert&&cb)cb();
+  else if(!wasAlert&&cancelCb)cancelCb();
 }
 // Escape and Enter keyboard support
 document.addEventListener('keydown',e=>{
@@ -1251,7 +1448,9 @@ function appAlert(message,opts){
   okBtn.className='ac-btn ok safe';
   // Hide cancel button — single-action modal.
   document.getElementById('ac-btn-cancel').style.display='none';
-  _acCallback=o.onClose||null;
+  // Hide extra button — appAlert is single-action
+  document.getElementById('ac-btn-extra').style.display='none';
+  _acCallback=o.onClose||null;_acCancelCallback=null;_acExtraCallback=null;
   document.getElementById('ac-overlay').classList.add('show');
 }
 
@@ -1416,6 +1615,10 @@ const G={
   seriesId:null,seriesData:null,seriesMatchNum:1,
   undoStack:[],
   _viewing:false,
+  // Match mode: 'normal' (default) or 'tenover' (10-over with running, 2/3 runs, double wickets, run outs)
+  matchMode:'normal',
+  // For tenover only: per-team double-wicket sets. Keys are team indices (0/1), values are Sets of player names.
+  playerWickets:[{},{}], // {playerName: 2|1} per team
 };
 let lbData=null;let lbTab='batting';let lbTabIdx=0;let lbMatches=[];let screenHistory=['home'];
 // Monotonic counter for unique ball IDs (avoids Date.now() collisions on rapid taps)
@@ -1547,31 +1750,114 @@ function goTo(id){
   if(id==='history')loadHistory();if(id==='leaderboard')loadLeaderboard();if(id==='home')loadHomeRecent();
   if(id==='setup')pcInitScreen(['a','b']);
   if(id==='series-setup'){initSeriesCountButtons();pcInitScreen(['sra','srb']);}
+  if(id==='tenover-setup')pcInitScreen(['toa','tob']);
+  if(id==='dw-assign')renderDWAssign();
+  // Apply tenover-mode UI flags (run buttons 2/3, Run Out button) only on the live match screen
+  if(id==='match')applyTenoverUiFlags();
   // Show "Save Now" button only on the live match screen
   const saveBtn=document.getElementById('save-now-btn');
   if(saveBtn)saveBtn.classList.toggle('show',id==='match');
+  // Push history sentinel so browser back triggers the live-match exit guard
+  if(id==='match'&&!G._viewing){pushMatchHistorySentinel();}
   if(id==='series-detail'){}// content set before calling goTo
 }
+// goBack — with safety guard when leaving the live match screen.
+// Going back from a live match would put the user on home WITHOUT cleanly saving,
+// which created the ambiguity bug where "did the match save?" was unclear.
+// Now we force a deliberate choice: Save & Exit, or Stay.
 function goBack(){
   if(screenHistory.length<=1)return;
-  // If we were viewing a historical match in the report screen, restore the live state.
   const leaving=screenHistory[screenHistory.length-1];
+  // GUARD: live match screen back button
+  if(leaving==='match'&&!G._viewing&&G.inn&&G.inn[0]&&!isMatchComplete()){
+    showLiveMatchExitGuard();
+    return; // do NOT navigate yet — wait for user choice in the modal
+  }
+  // If we were viewing a historical match in the report screen, restore the live state.
   if(leaving==='report'&&_liveStateBackup)restoreLiveState();
+  doActualBack();
+}
+// Helper — performs the actual navigation without the guard. Used after guard resolves.
+function doActualBack(){
+  if(screenHistory.length<=1)return;
   screenHistory.pop();const prev=screenHistory[screenHistory.length-1];
   const cur=document.querySelector('.screen.active');const prevEl=document.getElementById(prev);
+  if(!cur||!prevEl)return;
   cur.style.transform='translateX(100%)';prevEl.style.transform='translateX(-30%)';prevEl.classList.add('active');
   requestAnimationFrame(()=>{prevEl.style.transform='';setTimeout(()=>{cur.classList.remove('active');cur.style.transform='';},260);});
   if(prev==='home'){loadHomeRecent();checkActiveMatch();}
 }
+// Returns true if both innings are done OR it's a result-overlay state. Lets the back guard
+// skip itself once the match is officially over (so going to the report doesn't trigger it).
+function isMatchComplete(){
+  const i1=G.inn[0],i2=G.inn[1];
+  if(!i1)return true; // no match started, nothing to guard
+  if(G.innings===1&&i2){
+    // Chase complete if all balls bowled or target reached or all out
+    const oversDone=i2.currentOver>=G.totalOvers;
+    const allOut=i2.wickets>=i2.batsmen.length-1;
+    const chased=i1&&i2.runs>i1.runs;
+    if(oversDone||allOut||chased)return true;
+  }
+  return false;
+}
+// Live-match exit guard modal: Save & Exit / Stay
+function showLiveMatchExitGuard(){
+  appConfirm({
+    icon:'⚠️',
+    title:'Leave Live Match?',
+    message:'You have a live match in progress. Going back will not lose data — the match is auto-saved — but it will leave the match screen.\n\nWhat do you want to do?',
+    confirmText:'Save & Exit',
+    cancelText:'Stay',
+    danger:false,
+    onConfirm:async()=>{
+      // Force a save before leaving so the resume card surfaces correctly on return
+      try{await forceSaveNow();}catch(e){}
+      doActualBack();
+    },
+    onCancel:()=>{} // stays on match
+  });
+}
+// Intercept browser back button (popstate) when on the match screen.
+// We push a sentinel history entry on match enter; popstate then fires the guard instead of leaving.
+let _matchHistoryPushed=false;
+function pushMatchHistorySentinel(){
+  if(_matchHistoryPushed)return;
+  try{history.pushState({matchGuard:true},'',location.href);_matchHistoryPushed=true;}catch(e){}
+}
+window.addEventListener('popstate',()=>{
+  const cur=screenHistory[screenHistory.length-1];
+  if(cur==='match'&&!G._viewing&&G.inn&&G.inn[0]&&!isMatchComplete()){
+    // Re-push the sentinel so subsequent back presses also trigger the guard
+    pushMatchHistorySentinel();
+    showLiveMatchExitGuard();
+  }
+});
 
 // ═══ PLUS/MINUS ═══
+// Show/hide tenover-only buttons (2 and 3 runs, Run Out) based on current matchMode.
+// Each element knows its own default display via data-default-display or its class.
+function applyTenoverUiFlags(){
+  const show=G.matchMode==='tenover';
+  document.querySelectorAll('.tenover-only').forEach(el=>{
+    if(!show){el.style.display='none';return;}
+    // For runs-grid and dismiss-grid we want 'grid'; for the batter-row non-striker we want 'block'.
+    if(el.classList.contains('runs-grid')||el.classList.contains('dismiss-grid'))el.style.display='grid';
+    else el.style.display='block';
+  });
+  // Non-striker row visibility ultimately controlled by render(); reset display only if tenover OFF.
+  if(!show){
+    const ns=document.getElementById('m-nonstriker-row');if(ns)ns.style.display='none';
+  }
+}
+
 // ═══ PLAYER CHOOSER ═══
 // Replaces the manual text-input system. Pulls names from saved matches + alias keys,
 // dedupes through resolveName, and lets user toggle-select. First selected = captain.
 // Surfaces: 'a','b' (normal setup), 'sra','srb' (series setup), 'snsa','snsb' (next-match-in-series).
 const _pcKeys=['a','b','sra','srb','snsa','snsb'];
 // Per-surface selected names (resolved-name strings, order = captain first)
-let _pcSel={a:[],b:[],sra:[],srb:[],snsa:[],snsb:[]};
+let _pcSel={a:[],b:[],sra:[],srb:[],snsa:[],snsb:[],toa:[],tob:[]};
 // Extra names added via "Add new player" that aren't in the database yet (per session)
 let _pcAdded=[];
 // Build the union of all known names (resolved). Used to populate every chooser.
@@ -1593,7 +1879,7 @@ function pcRender(key){
   const names=pcAllKnownNames();
   const sel=_pcSel[key];
   // Determine the OTHER team's selection so we can grey out duplicates
-  const partnerKey={a:'b',b:'a',sra:'srb',srb:'sra',snsa:'snsb',snsb:'snsa'}[key];
+  const partnerKey={a:'b',b:'a',sra:'srb',srb:'sra',snsa:'snsb',snsb:'snsa',toa:'tob',tob:'toa'}[key];
   const partnerSel=partnerKey?(_pcSel[partnerKey]||[]):[];
   grid.innerHTML='';
   if(names.length===0){
@@ -1626,9 +1912,16 @@ function pcToggle(key,name){
   const sel=_pcSel[key];
   const idx=sel.indexOf(name);
   if(idx>=0)sel.splice(idx,1);
-  else sel.push(name);
+  else {
+    // Tenover surfaces (toa, tob) are capped at 3 players per team.
+    if((key==='toa'||key==='tob')&&sel.length>=3){
+      appAlert('Max 3 players per team in 10-over mode. Deselect one before adding another.',{icon:'⚠️',title:'Team Full'});
+      return;
+    }
+    sel.push(name);
+  }
   // Re-render BOTH paired surfaces so disabled state updates correctly
-  const partnerKey={a:'b',b:'a',sra:'srb',srb:'sra',snsa:'snsb',snsb:'snsa'}[key];
+  const partnerKey={a:'b',b:'a',sra:'srb',srb:'sra',snsa:'snsb',snsb:'snsa',toa:'tob',tob:'toa'}[key];
   pcRender(key);
   if(partnerKey)pcRender(partnerKey);
 }
@@ -1640,6 +1933,11 @@ function promptAddPlayer(key){
   const trimmed=name.trim();
   if(!trimmed)return;
   if(trimmed.length>30){appAlert('Name too long (max 30 chars).',{icon:'⚠️',title:'Too Long'});return;}
+  // Tenover team cap
+  if((key==='toa'||key==='tob')&&_pcSel[key].length>=3){
+    appAlert('Max 3 players per team in 10-over mode.',{icon:'⚠️',title:'Team Full'});
+    return;
+  }
   // Check duplicates against the full known set (case-insensitive)
   const all=pcAllKnownNames();
   const existing=all.find(n=>n.toLowerCase()===trimmed.toLowerCase());
@@ -1647,14 +1945,14 @@ function promptAddPlayer(key){
     // Just select that existing one — and re-render
     if(!_pcSel[key].includes(existing))_pcSel[key].push(existing);
     pcRender(key);
-    const partnerKey={a:'b',b:'a',sra:'srb',srb:'sra',snsa:'snsb',snsb:'snsa'}[key];
+    const partnerKey={a:'b',b:'a',sra:'srb',srb:'sra',snsa:'snsb',snsb:'snsa',toa:'tob',tob:'toa'}[key];
     if(partnerKey)pcRender(partnerKey);
     return;
   }
   _pcAdded.push(trimmed);
   _pcSel[key].push(trimmed);
   pcRender(key);
-  const partnerKey={a:'b',b:'a',sra:'srb',srb:'sra',snsa:'snsb',snsb:'snsa'}[key];
+  const partnerKey={a:'b',b:'a',sra:'srb',srb:'sra',snsa:'snsb',snsb:'snsa',toa:'tob',tob:'toa'}[key];
   if(partnerKey)pcRender(partnerKey);
 }
 // Reset selection for one or more keys
@@ -1711,9 +2009,121 @@ function proceedToToss(){
   G.teams[0]={name:tA,players:pA};G.teams[1]={name:tB,players:pB};
   G.totalOvers=o;G.matchDate=d;G.innings=0;G.inn=[null,null];G.seriesId=null;G.seriesData=null;G.seriesMatchNum=1;
   G.inningsBreak=false;G.pendingNB=false;
+  G.matchMode='normal'; // Reset — normal mode for this match
+  G.playerWickets=[{},{}];
   clearUndoStack();
   showTossStep1();goTo('toss');
 }
+
+// ═══ TENOVER MATCH SETUP ═══
+// Cap a chooser surface to a max number of selections (used for tenover where teams max out at 3 players).
+function pcEnforceMax(key,max){
+  const sel=_pcSel[key];
+  if(sel.length>max)sel.length=max;
+}
+function proceedToDWAssign(){
+  const tA=document.getElementById('to-ta-name').value.trim()||'Team A';
+  const tB=document.getElementById('to-tb-name').value.trim()||'Team B';
+  let pA=[..._pcSel.toa];
+  let pB=[..._pcSel.tob];
+  if(pA.length===0||pB.length===0){
+    appAlert(`Pick at least 1 player for each team.\n\n${tA}: ${pA.length}\n${tB}: ${pB.length}`,{icon:'👥',title:'Missing Players'});
+    return;
+  }
+  if(pA.length>3||pB.length>3){
+    appAlert(`Max 3 players per team in 10-over mode.\n\n${tA}: ${pA.length}\n${tB}: ${pB.length}`,{icon:'⚠️',title:'Too Many Players'});
+    return;
+  }
+  const overlap=pA.filter(n=>pB.includes(n));
+  if(overlap.length>0){
+    appAlert(`Same player on both teams: ${overlap.join(', ')}`,{icon:'⚠️',title:'Player Conflict'});
+    return;
+  }
+  // Store in G and go to DW assignment screen
+  G.teams[0]={name:tA,players:pA};G.teams[1]={name:tB,players:pB};
+  G.totalOvers=10;
+  G.matchDate=document.getElementById('to-date').value.trim()||new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+  G.matchMode='tenover';
+  G.playerWickets=[{},{}];
+  G.seriesId=null;G.seriesData=null;G.seriesMatchNum=1;
+  G.innings=0;G.inn=[null,null];G.inningsBreak=false;G.pendingNB=false;
+  clearUndoStack();
+  // Initialize DW selections (start empty for 3-player teams, auto-fill for 2-player teams)
+  _dwSel=[new Set(),new Set()];
+  if(pA.length===2)pA.forEach(n=>_dwSel[0].add(n));
+  if(pB.length===2)pB.forEach(n=>_dwSel[1].add(n));
+  goTo('dw-assign');
+}
+// Per-team double-wicket selections
+let _dwSel=[new Set(),new Set()];
+function renderDWAssign(){
+  ['a','b'].forEach((side,i)=>{
+    const team=G.teams[i];
+    document.getElementById(`dw-team-${side}-title`).textContent=team.name;
+    const grid=document.getElementById(`dw-${side}-grid`);
+    const status=document.getElementById(`dw-${side}-status`);
+    const instr=document.getElementById(`dw-${side}-instructions`);
+    grid.innerHTML='';
+    if(team.players.length===2){
+      instr.textContent='2-player team — both players automatically get double wickets';
+    } else {
+      instr.textContent='Tap exactly 2 players to mark as double-wicket';
+    }
+    team.players.forEach((name,idx)=>{
+      const chip=document.createElement('div');
+      const selected=_dwSel[i].has(name);
+      const teamCls=side==='a'?'sel-a':'sel-b';
+      chip.className='pc-chip'+(selected?' '+teamCls:'');
+      const cap=idx===0?'<span class="pc-cap">★</span>':'';
+      const tag=selected?'<span class="pc-idx">2W</span>':'<span class="pc-idx" style="background:rgba(255,200,0,.15)">1W</span>';
+      chip.innerHTML=`${esc(name)} ${cap}${tag}`;
+      // Only allow taps for 3-player teams; 2-player is fixed
+      if(team.players.length>2){
+        chip.onclick=()=>{
+          if(_dwSel[i].has(name)){_dwSel[i].delete(name);}
+          else {
+            if(_dwSel[i].size>=2){
+              // Already 2 selected — replace the oldest? Simpler: don't add, force user to deselect first.
+              return;
+            }
+            _dwSel[i].add(name);
+          }
+          renderDWAssign();
+        };
+      }
+      grid.appendChild(chip);
+    });
+    if(team.players.length===2){
+      status.innerHTML='<span style="color:var(--green)">✓ Both players have 2 wickets each</span>';
+    } else if(team.players.length===3){
+      status.innerHTML=_dwSel[i].size===2?'<span style="color:var(--green)">✓ 2 double-wicket players selected</span>':`<span style="color:var(--orange)">Pick ${2-_dwSel[i].size} more double-wicket player${2-_dwSel[i].size===1?'':'s'}</span>`;
+    } else {
+      // 1-player team — degenerate edge case, just give them double wickets
+      _dwSel[i].clear();team.players.forEach(n=>_dwSel[i].add(n));
+      status.innerHTML='<span style="color:var(--green)">✓ Player has 2 wickets</span>';
+    }
+  });
+}
+function confirmDWAndStart(){
+  // Validate: for 3-player teams, exactly 2 selected; for 2-player, both selected; for 1-player, that one.
+  for(let i=0;i<2;i++){
+    const team=G.teams[i];
+    if(team.players.length===3&&_dwSel[i].size!==2){
+      appAlert(`${team.name}: pick exactly 2 double-wicket players (currently ${_dwSel[i].size}).`,{icon:'⚠️',title:'Pick 2'});
+      return;
+    }
+  }
+  // Build playerWickets map
+  G.playerWickets=[{},{}];
+  for(let i=0;i<2;i++){
+    G.teams[i].players.forEach(n=>{
+      G.playerWickets[i][n]=_dwSel[i].has(n)?2:1;
+    });
+  }
+  // Proceed to toss
+  showTossStep1();goTo('toss');
+}
+function cancelDWAssign(){goBack();}
 
 // ═══ TOSS ═══
 function showTossStep1(){
@@ -1740,12 +2150,29 @@ function showTossConfirm(batting,bowling,choice){
 //   2) Resetting the inn before replaying balls (called from undo/applyEdit, after which
 //      replayBall is called for each saved ball). This rebuilds derived state from raw balls.
 function freshInn(bat,bowl){
-  return{bat,bowl,runs:0,wickets:0,balls:[],currentOver:0,currentBowlerIdx:null,lastOverBowlerIdx:null,legalInOver:0,nextFH:false,currentBatsmanIdx:0,currentBatterPlayerIdx:null,battingSequence:[],
-    batsmen:G.teams[bat].players.map(n=>({name:n,runs:0,balls:0,fours:0,sixes:0,out:false,howOut:'',catcher:''})),
+  // For tenover mode each batsman has wicketsLeft (1 or 2 based on pre-match assignment).
+  // Normal mode players always get 1 wicket.
+  const pw=G.playerWickets&&G.playerWickets[bat]||{};
+  return{bat,bowl,runs:0,wickets:0,balls:[],currentOver:0,currentBowlerIdx:null,lastOverBowlerIdx:null,legalInOver:0,nextFH:false,currentBatsmanIdx:0,currentBatterPlayerIdx:null,nonStrikerPlayerIdx:null,waitingDWReturn:null,battingSequence:[],
+    batsmen:G.teams[bat].players.map(n=>({name:n,runs:0,balls:0,fours:0,sixes:0,out:false,howOut:'',catcher:'',wicketsLeft:(G.matchMode==='tenover'?(pw[n]||1):1),initialWickets:(G.matchMode==='tenover'?(pw[n]||1):1)})),
     bowlers:G.teams[bowl].players.map(n=>({name:n,runs:0,wickets:0,legalBalls:0,wides:0,noballs:0})),
     extras:{wides:0,noballs:0,dead:0,total:0}};
 }
 const ci=()=>G.inn[G.innings];
+// Helper: total wicket POOL = sum of every batsman's initial wickets. For tenover: 2W players contribute 2.
+function totalWicketsPool(inn){if(!inn||!inn.batsmen)return 0;return inn.batsmen.reduce((s,b)=>s+(b.initialWickets||1),0);}
+// Helper: is this batsman a double-wicket player AND still has a wicket left (i.e. about to be dismissed for the first time)?
+function isDoubleWicketFirstDismissal(bt){return G.matchMode==='tenover'&&(bt.initialWickets||1)===2&&(bt.wicketsLeft||0)===2;}
+// Helper: which run values rotate strike? 1 and 3 swap; 2, 4, 6 stay.
+function strikeChangesOnRuns(r){return r===1||r===3;}
+// Swap striker and non-striker (tenover only)
+function swapStrike(inn){
+  if(G.matchMode!=='tenover')return;
+  if(inn.nonStrikerPlayerIdx===null||inn.nonStrikerPlayerIdx===undefined)return;
+  const tmp=inn.currentBatterPlayerIdx;
+  inn.currentBatterPlayerIdx=inn.nonStrikerPlayerIdx;
+  inn.nonStrikerPlayerIdx=tmp;
+}
 
 function addBall(ball){
   const inn=ci();if(!inn)return;
@@ -1802,7 +2229,15 @@ function addBall(ball){
       setTimeout(()=>haptic(HAPTIC.milestone),250);
     }
   }
-  inn.balls.push(ball);advOv(inn,bw);if(checkEnd())return;render();autoSave();
+  inn.balls.push(ball);advOv(inn,bw);
+  // STRIKE ROTATION (tenover mode only). Runs 1 and 3 → swap. Plus a strike-change at over end.
+  if(G.matchMode==='tenover'){
+    if(ball.type==='run'&&strikeChangesOnRuns(ball.runs))swapStrike(inn);
+    // Over just ended? legalInOver wraps to 0 after the 6th legal ball — detect by inspecting the just-incremented currentOver
+    // We need to detect this BEFORE the over rolled. advOv sets legalInOver=0 when over rolled, so use that.
+    if(inn.legalInOver===0&&ball.legal&&ball.type!=='dead')swapStrike(inn);
+  }
+  if(checkEnd())return;render();autoSave();
 }
 
 function wicket(how){
@@ -1810,29 +2245,70 @@ function wicket(how){
   if(G.pendingNB){appAlert('You have a pending No Ball. Tap 0, 1, 4, or 6 first, or tap Undo to cancel.',{icon:'🦶',title:'Pending No Ball'});return;}
   if(inn.currentBowlerIdx===null&&how!=='Retired'){appAlert('Select a bowler first!',{icon:'🎯',title:'Pick a Bowler'});return;}
   // Free hit only blocks delivery-based dismissals. Retired Out is a between-balls action and is always allowed.
-  if(inn.nextFH&&how!=='Retired'){appAlert('FREE HIT — batsman cannot be dismissed on this ball!',{icon:'🔥',title:'Free Hit Active'});return;}
+  // Free hit only blocks delivery-based dismissals. Retired Out and Run Out are exceptions:
+  // - Retired Out happens between balls.
+  // - Run Out is allowed on a free hit in real cricket (running between wickets is fielders' play, not bowler's).
+  if(inn.nextFH&&how!=='Retired'&&how!=='RunOut'){appAlert('FREE HIT — batsman cannot be dismissed on this ball (except Run Out)!',{icon:'🔥',title:'Free Hit Active'});return;}
   if(how==='Caught'){openCaughtModal();return;}
+  if(how==='RunOut'){openRunOutModal();return;}
   doWicket(how,'');
 }
 
-function doWicket(how,catcher){
+function doWicket(how,catcher,extra){
+  // extra is an optional object: { thrower, completer } for RunOut.
   const inn=ci();const bw=inn.currentBowlerIdx!==null?inn.bowlers[inn.currentBowlerIdx]:null;const bt=inn.batsmen[inn.currentBatterPlayerIdx];
   snapshot();
   const isRetired=(how==='Retired');
-  bt.out=true;bt.howOut=how;bt.catcher=catcher;
+  const isRunOut=(how==='RunOut');
+  // Determine if this dismissal is the "first dismissal" of a double-wicket player (they continue, captain choice).
+  const isFirstDismissalOfDW=(G.matchMode==='tenover'&&(bt.initialWickets||1)===2&&(bt.wicketsLeft||0)===2);
+  // Decrement wicket pool for the dismissed batsman. Out flag only set when wicketsLeft reaches 0.
+  bt.wicketsLeft=Math.max(0,(bt.wicketsLeft||1)-1);
+  if(bt.wicketsLeft===0){
+    bt.out=true;bt.howOut=how;bt.catcher=catcher||'';
+    if(isRunOut&&extra){bt.runoutThrower=extra.thrower||'';bt.runoutCompleter=extra.completer||'';}
+  } else {
+    // First dismissal of a 2W player: mark a sub-status but DON'T set .out yet. Track on the batsman for the BBL/report.
+    bt.firstDismissalHow=how;
+    bt.firstDismissalCatcher=catcher||'';
+    if(isRunOut&&extra){bt.firstDismissalThrower=extra.thrower||'';bt.firstDismissalCompleter=extra.completer||'';}
+  }
   if(!isRetired)bt.balls++;
-  // Retired Out is not a delivery — it happens between balls when the ball is dead.
-  // No bowler credit, no legal ball, no over advancement, no free-hit reset.
-  if(!isRetired&&bw)bw.wickets++;
+  // Retired Out: between balls when ball is dead. No bowler credit, no legal ball, no over advancement, no FH reset.
+  // RunOut: legal ball happened, but bowler does NOT get the wicket credit (cricket rule).
+  if(!isRetired&&!isRunOut&&bw)bw.wickets++;
   inn.wickets++;
-  const ball={type:'wicket',how,catcher,fh:false,over:inn.currentOver,bowlerIdx:isRetired?null:inn.currentBowlerIdx,batsmanIdx:inn.currentBatterPlayerIdx,legal:!isRetired,id:nextBallId()};
+  const ball={type:'wicket',how,catcher:catcher||'',fh:false,over:inn.currentOver,bowlerIdx:isRetired?null:inn.currentBowlerIdx,batsmanIdx:inn.currentBatterPlayerIdx,legal:!isRetired,id:nextBallId(),isFirstDismissalOfDW,doubleWicketContinued:false};
+  if(isRunOut&&extra){ball.thrower=extra.thrower||'';ball.completer=extra.completer||'';}
   inn.balls.push(ball);
   if(!isRetired){
     inn.nextFH=false;
     if(bw){bw.legalBalls++;advOv(inn,bw);}
+    // Over-end strike swap (tenover) — same logic as in addBall
+    if(G.matchMode==='tenover'&&inn.legalInOver===0)swapStrike(inn);
   }
-  inn.currentBatsmanIdx++;inn.currentBatterPlayerIdx=null;
   haptic(HAPTIC.wicket);
+  // Branch: first dismissal of a 2W player → ask captain choice (and DON'T advance batsman index).
+  if(isFirstDismissalOfDW){
+    if(checkEnd())return;render();autoSave();
+    showDoubleWicketChoice(ball,bt);
+    return;
+  }
+  // Normal flow: advance to next batsman.
+  // Tenover mode: if there's a 2W player waiting to return (waitingDWReturn), they auto-take strike.
+  if(G.matchMode==='tenover'&&inn.waitingDWReturn!==null&&inn.waitingDWReturn!==undefined){
+    const returningIdx=inn.waitingDWReturn;
+    inn.waitingDWReturn=null;
+    inn.currentBatterPlayerIdx=returningIdx;
+    // returningIdx already in battingSequence from previous innings activity; nonStriker unchanged.
+    haptic(HAPTIC.wicket);
+    if(checkEnd())return;render();autoSave();
+    return;
+  }
+  // Otherwise: standard new-batsman selector
+  inn.currentBatsmanIdx++;inn.currentBatterPlayerIdx=null;
+  // Tenover: if striker out, the non-striker is still at the crease — bring next batsman in as the new striker.
+  // (currentBatterPlayerIdx is the striker; non-striker stays in nonStrikerPlayerIdx — selector picks new striker.)
   if(checkEnd())return;render();autoSave();showBatsmanSelector();
 }
 
@@ -1853,10 +2329,18 @@ function showBatsmanSelector(){
   const inn=ci();if(!inn)return;
   const notYetBatted=inn.batsmen.map((bt,i)=>({bt,i})).filter(({i})=>!inn.battingSequence.includes(i)&&!inn.batsmen[i].out);
   const isOpener=inn.battingSequence.length===0;
+  // Tenover mode + opener: this picks the STRIKER. After they pick, we'll chain to non-striker selector.
+  // Tenover mode + non-striker pending: this picks the NON-STRIKER (after striker is set).
+  const tenoverPickingNonStriker=G.matchMode==='tenover'&&inn.battingSequence.length===1&&inn.nonStrikerPlayerIdx===null&&notYetBatted.length>0;
   const modal=document.getElementById('mod-batsman');
-  document.getElementById('batsman-sel-title').textContent=isOpener?'OPENING BATSMAN':'NEXT BATSMAN';
+  let title=isOpener?'OPENING STRIKER':'NEXT BATSMAN';
+  if(tenoverPickingNonStriker)title='OPENING NON-STRIKER';
+  document.getElementById('batsman-sel-title').textContent=title;
   const sub=document.getElementById('batsman-sel-sub');
-  if(!isOpener){const crease=inn.battingSequence.filter(idx=>!inn.batsmen[idx].out);sub.textContent=crease.length>0?`🏏 ${resolveName(inn.batsmen[crease[crease.length-1]].name)} is at the crease`:'';
+  if(tenoverPickingNonStriker){
+    const strikerName=resolveName(inn.batsmen[inn.currentBatterPlayerIdx].name);
+    sub.textContent=`🏏 ${strikerName} is striking — choose the partner`;
+  } else if(!isOpener){const crease=inn.battingSequence.filter(idx=>!inn.batsmen[idx].out);sub.textContent=crease.length>0?`🏏 ${resolveName(inn.batsmen[crease[crease.length-1]].name)} is at the crease`:'';
   } else {sub.textContent='Choose who opens the batting';}
   const list=document.getElementById('batsman-sel-list');list.innerHTML='';
   notYetBatted.forEach(({bt,i},idx)=>{
@@ -1864,18 +2348,50 @@ function showBatsmanSelector(){
     btn.className='bat-sel-btn';
     btn.style.animationDelay=(60+idx*45)+'ms';
     const isCapt=i===0;
-    btn.innerHTML=`<span>${esc(resolveName(bt.name))}</span>${isCapt?'<span class="cap-tag">(C)</span>':''}`;
+    // Show wicket count tag in tenover mode
+    const wTag=G.matchMode==='tenover'?`<span class="cap-tag" style="background:rgba(220,180,40,.18);color:var(--gold);margin-left:6px">${bt.initialWickets||1}W</span>`:'';
+    btn.innerHTML=`<span>${esc(resolveName(bt.name))}</span>${isCapt?'<span class="cap-tag">(C)</span>':''}${wTag}`;
     btn.onclick=()=>selectBatsman(i);
     list.appendChild(btn);
   });
   if(notYetBatted.length===0){modal.classList.remove('show');return;}
   modal.classList.add('show');
 }
-function selectBatsman(playerIdx){const inn=ci();if(!inn)return;snapshot();inn.currentBatterPlayerIdx=playerIdx;inn.battingSequence.push(playerIdx);document.getElementById('mod-batsman').classList.remove('show');render();autoSave();}
+function selectBatsman(playerIdx){
+  const inn=ci();if(!inn)return;
+  snapshot();
+  // Tenover non-striker selection (chained from opener pick)
+  if(G.matchMode==='tenover'&&inn.battingSequence.length===1&&inn.nonStrikerPlayerIdx===null){
+    inn.nonStrikerPlayerIdx=playerIdx;
+    inn.battingSequence.push(playerIdx);
+    document.getElementById('mod-batsman').classList.remove('show');
+    render();autoSave();
+    return;
+  }
+  inn.currentBatterPlayerIdx=playerIdx;
+  inn.battingSequence.push(playerIdx);
+  document.getElementById('mod-batsman').classList.remove('show');
+  // If tenover opener was just picked AND a non-striker is needed, chain
+  if(G.matchMode==='tenover'&&inn.battingSequence.length===1&&inn.nonStrikerPlayerIdx===null){
+    const remaining=inn.batsmen.filter((b,i)=>!inn.battingSequence.includes(i)&&(b.wicketsLeft||0)>0);
+    if(remaining.length>0){
+      setTimeout(()=>showBatsmanSelector(),250);
+    }
+  }
+  render();autoSave();
+}
 
 function checkEnd(){
   const inn=ci();
-  const allOut=inn.currentBatsmanIdx>=inn.batsmen.length;
+  // Tenover mode: innings ends when ≤1 batsman has wicketsLeft > 0 (need 2 for a partnership).
+  // Normal mode: innings ends at "all out" = currentBatsmanIdx exceeded batsmen.length.
+  let allOut;
+  if(G.matchMode==='tenover'){
+    const stillIn=inn.batsmen.filter(b=>(b.wicketsLeft||0)>0).length;
+    allOut=stillIn<=1;
+  } else {
+    allOut=inn.currentBatsmanIdx>=inn.batsmen.length;
+  }
   const oversUp=inn.currentOver>=G.totalOvers;
   const chased=G.innings===1&&G.inn[0]&&inn.runs>G.inn[0].runs;
   if(allOut||oversUp||chased){
@@ -1944,9 +2460,12 @@ function replayBall(b){
   // Retired Out is not a delivery — just records the dismissal, doesn't touch over/bowler/free-hit.
   if(b.type==='wicket'&&b.how==='Retired'){
     const bt=b.batsmanIdx!==undefined&&b.batsmanIdx!==null?inn.batsmen[b.batsmanIdx]:null;
-    if(bt){bt.out=true;bt.howOut='Retired';bt.catcher=b.catcher||'';}
+    if(bt){
+      bt.wicketsLeft=Math.max(0,(bt.wicketsLeft||1)-1);
+      if(bt.wicketsLeft===0){bt.out=true;bt.howOut='Retired';bt.catcher=b.catcher||'';}
+    }
     inn.wickets++;
-    inn.currentBatsmanIdx++;inn.currentBatterPlayerIdx=null;
+    if(!b.doubleWicketContinued){inn.currentBatsmanIdx++;inn.currentBatterPlayerIdx=null;}
     return;
   }
   if(b.type==='dead'){inn.extras.dead++;return;}
@@ -1965,14 +2484,32 @@ function replayBall(b){
     const bt=inn.batsmen[b.batsmanIdx];
     if(bt){bt.runs+=b.runs;bt.balls++;if(b.runs===4)bt.fours++;if(b.runs===6)bt.sixes++;}
     if(bw)bw.legalBalls++;
+    // Tenover strike rotation on 1/3
+    if(G.matchMode==='tenover'&&strikeChangesOnRuns(b.runs))swapStrike(inn);
   }
   if(b.type==='wicket'){
     const bt=inn.batsmen[b.batsmanIdx];
-    if(bt){bt.out=true;bt.howOut=b.how;bt.catcher=b.catcher||'';bt.balls++;}
-    if(bw)bw.wickets++;inn.wickets++;if(bw)bw.legalBalls++;
-    inn.currentBatsmanIdx++;inn.currentBatterPlayerIdx=null;
+    if(bt){
+      // Decrement wicketsLeft; full-out only when reaches 0.
+      bt.wicketsLeft=Math.max(0,(bt.wicketsLeft||1)-1);
+      if(bt.wicketsLeft===0){bt.out=true;bt.howOut=b.how;bt.catcher=b.catcher||'';}
+      bt.balls++;
+    }
+    // RunOut: bowler doesn't get wicket credit (cricket rule).
+    if(bw){if(b.how!=='RunOut')bw.wickets++;bw.legalBalls++;}
+    inn.wickets++;
+    // Only advance batsman index if this is NOT a doubleWicketContinued event.
+    if(!b.doubleWicketContinued){
+      inn.currentBatsmanIdx++;
+      // Tenover: if waitingDWReturn exists at THIS point, restore them as the new striker.
+      // (replayBall doesn't have UI; this just re-establishes state.) We don't store waitingDWReturn in the ball, so this is a best-effort guess.
+      // For correctness during edit/undo flows, we'll let render() reflect current state; nonStriker stays.
+      inn.currentBatterPlayerIdx=null;
+    }
   }
   if(bw)advOv(inn,bw);
+  // Tenover: over-end strike rotation
+  if(G.matchMode==='tenover'&&inn.legalInOver===0&&b.legal&&b.type!=='dead')swapStrike(inn);
 }
 
 // ═══ EDIT ═══
@@ -2013,11 +2550,150 @@ function openCaughtModal(){
 }
 function closeCaughtModal(){document.getElementById('mod-caught').classList.remove('show');}
 
+// ═══ RUN OUT MODAL (tenover only) ═══
+let _roSelectedThrower=null;
+let _roSelectedCompleter=null;
+function openRunOutModal(){
+  const inn=ci();if(!inn)return;
+  _roSelectedThrower=null;_roSelectedCompleter=null;
+  const bowlingTeam=G.teams[inn.bowl];
+  // Pre-render both grids
+  renderRunOutGrid('ro-thrower-grid',bowlingTeam.players,(name)=>{_roSelectedThrower=name;renderRunOutGrids();});
+  renderRunOutGrid('ro-completer-grid',bowlingTeam.players,(name)=>{_roSelectedCompleter=name;renderRunOutGrids();});
+  document.getElementById('mod-runout').classList.add('show');
+}
+function renderRunOutGrids(){
+  const inn=ci();if(!inn)return;
+  const bowlingTeam=G.teams[inn.bowl];
+  renderRunOutGrid('ro-thrower-grid',bowlingTeam.players,(name)=>{_roSelectedThrower=name;renderRunOutGrids();});
+  renderRunOutGrid('ro-completer-grid',bowlingTeam.players,(name)=>{_roSelectedCompleter=name;renderRunOutGrids();});
+}
+function renderRunOutGrid(gridId,names,onPick){
+  const grid=document.getElementById(gridId);if(!grid)return;
+  grid.innerHTML='';
+  const isThrower=gridId==='ro-thrower-grid';
+  const isCompleter=gridId==='ro-completer-grid';
+  names.forEach(name=>{
+    const chip=document.createElement('div');
+    const selected=(isThrower&&name===_roSelectedThrower)||(isCompleter&&name===_roSelectedCompleter);
+    chip.className='pc-chip'+(selected?' sel-a':'');
+    chip.textContent=resolveName(name);
+    chip.onclick=()=>onPick(name);
+    grid.appendChild(chip);
+  });
+}
+function closeRunOutModal(){document.getElementById('mod-runout').classList.remove('show');_roSelectedThrower=null;_roSelectedCompleter=null;}
+function confirmRunOut(){
+  if(!_roSelectedThrower||!_roSelectedCompleter){
+    appAlert('Pick both the thrower and the completer (they can be the same player for a direct hit).',{icon:'🏃',title:'Pick Both'});
+    return;
+  }
+  const thrower=_roSelectedThrower,completer=_roSelectedCompleter;
+  closeRunOutModal();
+  doWicket('RunOut','',{thrower,completer});
+}
+
+// ═══ DOUBLE-WICKET CHOICE (tenover only) ═══
+// Shown after first dismissal of a 2W player. Lets captain decide whether dismissed player
+// uses 2nd wicket immediately, or single-wicket teammate comes in.
+let _dwcContext=null;
+function showDoubleWicketChoice(wicketBall,dismissedBatsman){
+  const inn=ci();if(!inn){return;}
+  const teamPlayers=G.teams[inn.bat].players;
+  // Find the single-wicket player (initialWickets===1) who has wicketsLeft>0 AND has not been dismissed.
+  // Also they shouldn't already be at the crease (as non-striker).
+  const swCandidates=inn.batsmen.map((b,idx)=>({b,idx})).filter(({b,idx})=>{
+    if((b.initialWickets||1)!==1)return false;
+    if(b.wicketsLeft<=0)return false;
+    if(idx===inn.nonStrikerPlayerIdx)return false; // already at crease
+    return true;
+  });
+  // Edge case: 2-player team → no other player. Auto-continue with no modal.
+  // Also: 3-player team where SW player has been dismissed → auto-continue.
+  const swAlreadyAtCrease=inn.nonStrikerPlayerIdx!==null&&inn.nonStrikerPlayerIdx!==undefined&&(inn.batsmen[inn.nonStrikerPlayerIdx].initialWickets||1)===1;
+  if(swCandidates.length===0&&!swAlreadyAtCrease){
+    // Auto-continue: dismissed player uses 2nd wicket immediately.
+    autoContinueDW(wicketBall);
+    return;
+  }
+  _dwcContext={wicketBall,dismissedIdx:inn.currentBatterPlayerIdx,swPlayerIdx:swCandidates.length>0?swCandidates[0].idx:null,swAlreadyAtCrease};
+  document.getElementById('dwc-title').textContent=`${resolveName(dismissedBatsman.name)} — Captain's Choice`;
+  let msg=`${resolveName(dismissedBatsman.name)} has been dismissed but has a second wicket left.`;
+  let swapBtn=document.getElementById('dwc-btn-swap');
+  if(swAlreadyAtCrease){
+    const swName=resolveName(inn.batsmen[inn.nonStrikerPlayerIdx].name);
+    msg+=`\n\n${swName} (single-wicket) is already at the non-striker end. Choose: continue with ${resolveName(dismissedBatsman.name)} on 2nd wicket, OR give strike to ${swName}.`;
+    swapBtn.textContent=`Give strike to ${resolveName(inn.batsmen[inn.nonStrikerPlayerIdx].name)}`;
+  } else if(swCandidates.length>0){
+    const swName=resolveName(swCandidates[0].b.name);
+    msg+=`\n\nSend in ${swName} (single-wicket) to bat instead, OR have ${resolveName(dismissedBatsman.name)} continue on their 2nd wicket.`;
+    swapBtn.textContent=`Send in ${swName}`;
+  }
+  document.getElementById('dwc-msg').textContent=msg;
+  document.getElementById('mod-dwchoice').classList.add('show');
+}
+function autoContinueDW(wicketBall){
+  const inn=ci();if(!inn)return;
+  // Mark the wicket ball as "double wicket continued" (the dismissed player keeps batting)
+  if(wicketBall)wicketBall.doubleWicketContinued=true;
+  // currentBatterPlayerIdx stays the same — they continue
+  render();autoSave();
+}
+function dwChoice(choice){
+  document.getElementById('mod-dwchoice').classList.remove('show');
+  const inn=ci();if(!inn||!_dwcContext)return;
+  const ctx=_dwcContext;_dwcContext=null;
+  if(choice==='continue'){
+    // Dismissed batsman continues at the crease using their 2nd wicket. No change to currentBatterPlayerIdx.
+    if(ctx.wicketBall)ctx.wicketBall.doubleWicketContinued=true;
+    render();autoSave();
+    return;
+  }
+  // 'swap': send in SW player (or give strike to existing non-striker SW player)
+  if(ctx.swAlreadyAtCrease){
+    // SW player is non-striker. They become striker. Dismissed 2W player goes to waiting bench.
+    // The non-striker slot needs a new player — pick the remaining 2W teammate (if any unbatted left).
+    const swPlayerIdx=inn.nonStrikerPlayerIdx;
+    const dismissedIdx=ctx.dismissedIdx;
+    inn.currentBatterPlayerIdx=swPlayerIdx;
+    // Find a remaining batsman to take the non-striker slot (not the dismissed player, not the SW)
+    const newNonStriker=inn.batsmen.findIndex((b,idx)=>idx!==dismissedIdx&&idx!==swPlayerIdx&&(b.wicketsLeft||0)>0&&!inn.battingSequence.includes(idx));
+    if(newNonStriker>=0){
+      inn.nonStrikerPlayerIdx=newNonStriker;
+      if(!inn.battingSequence.includes(newNonStriker))inn.battingSequence.push(newNonStriker);
+    } else {
+      // No fresh batsman available to fill non-striker — dismissed player goes to non-striker slot as their "remaining wicket" return position
+      inn.nonStrikerPlayerIdx=dismissedIdx;
+    }
+    // Park dismissed player in waitingDWReturn IF nonStriker slot got someone else
+    if(newNonStriker>=0)inn.waitingDWReturn=dismissedIdx;
+    else inn.waitingDWReturn=null;
+  } else if(ctx.swPlayerIdx!==null){
+    // New SW player comes in as striker; dismissed 2W player goes to waitingDWReturn (bench).
+    // Non-striker stays unchanged.
+    if(!inn.battingSequence.includes(ctx.swPlayerIdx))inn.battingSequence.push(ctx.swPlayerIdx);
+    inn.currentBatterPlayerIdx=ctx.swPlayerIdx;
+    inn.waitingDWReturn=ctx.dismissedIdx;
+  }
+  render();autoSave();
+}
+
 // ═══ RENDER ═══
 function bClass(b){if(b.type==='wicket')return'W';if(b.type==='wide')return'WD';if(b.type==='noball')return'NB';if(b.type==='dead')return'DB';if(b.type==='run'){if(b.runs===6)return'r6';if(b.runs===4)return'r4';if(b.runs===0)return'dot';return'r1';}return'';}
 function bLabel(b){if(b.type==='wicket')return'W';if(b.type==='wide')return'Wd';if(b.type==='noball'){const r=b.runs||0;return r>0?`NB+${r}`:'NB';}if(b.type==='dead')return'DB';if(b.type==='run')return b.runs===0?'·':String(b.runs);return'?';}
 function bDesc(b){
-  if(b.type==='wicket'){let s=`OUT — ${b.how}`;if(b.how==='Caught'&&b.catcher)s+=` (c: ${resolveName(b.catcher)})`;return s+(b.fh?' 🔥':'');}
+  if(b.type==='wicket'){
+    let s=`OUT — ${b.how}`;
+    if(b.how==='Caught'&&b.catcher)s+=` (c: ${resolveName(b.catcher)})`;
+    if(b.how==='RunOut'){
+      const t=b.thrower?resolveName(b.thrower):'';
+      const c=b.completer?resolveName(b.completer):'';
+      if(t&&c&&t===c)s+=` (direct hit: ${c})`;
+      else if(t&&c)s+=` (throw: ${t}, out by: ${c})`;
+    }
+    if(b.doubleWicketContinued)s+=' — 1st wicket, continued';
+    return s+(b.fh?' 🔥':'');
+  }
   if(b.type==='wide')return'Wide — +1 run, rebowled';
   if(b.type==='noball'){const r=b.runs||0;return r>0?`No Ball — +${1+r} total (1 penalty + ${r} scored), FREE HIT next`:'No Ball — +1 run, FREE HIT next';}
   if(b.type==='dead')return'Dead Ball — rebowled';
@@ -2060,13 +2736,44 @@ function render(){
   if(bIdx!==null&&bIdx<inn.batsmen.length){
     const bt=inn.batsmen[bIdx];const isCapt=bIdx===0;
     const sr=bt.balls>0?((bt.runs/bt.balls)*100).toFixed(0):'—';
-    document.getElementById('m-batsman').textContent=resolveName(bt.name)+(isCapt?' (C)':'');
+    // Tenover: show * for striker indicator and (2W/1W) wicket-count tag.
+    let suffix=isCapt?' (C)':'';
+    if(G.matchMode==='tenover'){
+      const wTag=(bt.initialWickets||1)===2?' [2W]':' [1W]';
+      const wLeft=bt.wicketsLeft||0;
+      suffix=`${isCapt?' (C)':''} ★${wTag}${wLeft<(bt.initialWickets||1)?' (on last wicket)':''}`;
+    }
+    document.getElementById('m-batsman').textContent=resolveName(bt.name)+suffix;
     document.getElementById('m-bat-runs').textContent=bt.runs;
     document.getElementById('m-bat-balls').textContent=bt.balls;
     document.getElementById('m-bat-sr').textContent=sr;
   } else {
     document.getElementById('m-batsman').textContent=inn.currentBatsmanIdx>=inn.batsmen.length?'All Out':'Waiting...';
     document.getElementById('m-bat-runs').textContent='—';document.getElementById('m-bat-balls').textContent='—';document.getElementById('m-bat-sr').textContent='—';
+  }
+  // Tenover: populate non-striker row if there's one set
+  const nsRow=document.getElementById('m-nonstriker-row');
+  if(nsRow){
+    if(G.matchMode==='tenover'&&inn.nonStrikerPlayerIdx!==null&&inn.nonStrikerPlayerIdx!==undefined&&inn.nonStrikerPlayerIdx<inn.batsmen.length){
+      const nbt=inn.batsmen[inn.nonStrikerPlayerIdx];
+      const nIsCapt=inn.nonStrikerPlayerIdx===0;
+      const nWTag=(nbt.initialWickets||1)===2?' [2W]':' [1W]';
+      document.getElementById('m-nonstriker').textContent=resolveName(nbt.name)+(nIsCapt?' (C)':'')+nWTag;
+      document.getElementById('m-nonstriker-stats').textContent=`${nbt.runs}r · ${nbt.balls}b · at non-striker end`;
+      nsRow.style.display='block';
+    } else if(G.matchMode==='tenover'&&inn.waitingDWReturn!==null&&inn.waitingDWReturn!==undefined){
+      // No active non-striker but a 2W player is parked waiting to return
+      const wbt=inn.batsmen[inn.waitingDWReturn];
+      if(wbt){
+        document.getElementById('m-nonstriker').textContent=`⏳ ${resolveName(wbt.name)} (waiting for 2nd wicket)`;
+        document.getElementById('m-nonstriker-stats').textContent=`${wbt.runs}r · ${wbt.balls}b`;
+        nsRow.style.display='block';
+      } else {
+        nsRow.style.display='none';
+      }
+    } else {
+      nsRow.style.display='none';
+    }
   }
   // bowler
   const chips=document.getElementById('m-bowl-chips');chips.innerHTML='';
@@ -2192,9 +2899,24 @@ function showReport(){
     const ordered=[...seq.map(si=>({bt:inn.batsmen[si],i:si})),...inn.batsmen.map((bt,si)=>({bt,i:si})).filter(({i:si})=>!seq.includes(si))];
     let brows=ordered.map(({bt,i:si})=>{
       const isCapt=si===0;let howOut='not out';if(bt.balls===0&&!bt.out)howOut='did not bat';
-      if(bt.out){const wb=inn.balls.find(b=>b.type==='wicket'&&b.batsmanIdx===si);const bn=wb&&wb.bowlerIdx!==null?inn.bowlers[wb.bowlerIdx].name:'?';if(bt.howOut==='Caught')howOut=`c ${bt.catcher||'?'} b ${bn}`;else if(bt.howOut==='Bowled')howOut=`b ${bn}`;else howOut=bt.howOut;}
+      if(bt.out){
+        const wb=inn.balls.find(b=>b.type==='wicket'&&b.batsmanIdx===si&&(b.doubleWicketContinued!==true));
+        const bn=wb&&wb.bowlerIdx!==null?inn.bowlers[wb.bowlerIdx].name:'?';
+        if(bt.howOut==='Caught')howOut=`c ${bt.catcher||'?'} b ${bn}`;
+        else if(bt.howOut==='Bowled')howOut=`b ${bn}`;
+        else if(bt.howOut==='RunOut'){
+          const t=wb&&wb.thrower?resolveName(wb.thrower):'';
+          const c=wb&&wb.completer?resolveName(wb.completer):'';
+          if(t&&c&&t===c)howOut=`run out (${c})`;
+          else if(t&&c)howOut=`run out (${t}/${c})`;
+          else howOut='run out';
+        }
+        else howOut=bt.howOut;
+      }
       const sr=bt.balls>0?((bt.runs/bt.balls)*100).toFixed(0):'—';
-      const nameCell=`${esc(resolveName(bt.name))}${isCapt?'<span style="font-size:10px;color:var(--gold);opacity:0.7;margin-left:4px">(C)</span>':''}`;
+      // Tenover: show 2W tag for double-wicket players
+      const dwTag=((bt.initialWickets||1)===2)?'<span style="font-size:9px;color:var(--gold);opacity:.8;margin-left:4px;padding:1px 5px;background:rgba(220,180,40,.18);border-radius:4px">2W</span>':'';
+      const nameCell=`${esc(resolveName(bt.name))}${isCapt?'<span style="font-size:10px;color:var(--gold);opacity:0.7;margin-left:4px">(C)</span>':''}${dwTag}`;
       return`<tr><td>${nameCell}</td><td class="mu" style="font-size:11px">${esc(howOut)}</td><td class="mono r ${bt.runs>=20?'gl':''}">${bt.runs}</td><td class="mono r">${bt.balls}</td><td class="mono r">${bt.fours}</td><td class="mono r">${bt.sixes}</td><td class="mono r">${sr}</td></tr>`;
     }).join('');
     brows+=`<tr><td colspan="2" class="mu">Extras (Wd ${inn.extras.wides}, NB ${inn.extras.noballs})</td><td class="mono r gl" colspan="5">${inn.extras.total}</td></tr>`;
@@ -2316,9 +3038,10 @@ async function saveMatchToCloud(){
     const i1=G.inn[0],i2=G.inn[1];let winner='TIE';
     if(i2){if(i2.runs>i1.runs)winner=G.teams[i2.bat].name;else if(i1.runs>i2.runs)winner=G.teams[i1.bat].name;}else winner=G.teams[i1.bat].name;
     const playerStats=buildPlayerStats(i1,i2);const matchStats=buildMatchStats(i1,i2);
-    const matchId=await window._db.saveMatch({date:G.matchDate,ts:Date.now(),teams:[G.teams[0].name,G.teams[1].name],scores:[`${i1.runs}/${i1.wickets}`,i2?`${i2.runs}/${i2.wickets}`:'—'],winner,toss:{winner:G.teams[G.toss.winner].name,choice:G.toss.choice},playerStats,matchStats,seriesId:G.seriesId||null,matchNum:G.seriesMatchNum||null,matchData:JSON.stringify({teams:G.teams,inn:G.inn,totalOvers:G.totalOvers,matchDate:G.matchDate,toss:G.toss})});
+    const matchId=await window._db.saveMatch({date:G.matchDate,ts:Date.now(),teams:[G.teams[0].name,G.teams[1].name],scores:[`${i1.runs}/${i1.wickets}`,i2?`${i2.runs}/${i2.wickets}`:'—'],winner,toss:{winner:G.teams[G.toss.winner].name,choice:G.toss.choice},playerStats,matchStats,seriesId:G.seriesId||null,matchNum:G.seriesMatchNum||null,matchMode:G.matchMode||'normal',matchData:JSON.stringify({teams:G.teams,inn:G.inn,totalOvers:G.totalOvers,matchDate:G.matchDate,toss:G.toss,matchMode:G.matchMode||'normal',playerWickets:G.playerWickets||[{},{}]})});
     try{await window._db.deleteActiveMatch();}catch(e){}
     try{localStorage.removeItem(LOCAL_ACTIVE_KEY);}catch(e){}
+    _matchHistoryPushed=false; // reset back-guard sentinel — match is done
     syncMsg('✓ Saved','ok');
     invalidateLeaderboardCaches();
     return matchId;
@@ -2326,11 +3049,43 @@ async function saveMatchToCloud(){
 }
 function buildPlayerStats(i1,i2){
   const stats={};
-  function ensure(name){if(!stats[name])stats[name]={name,matches:1,runs:0,balls:0,fours:0,sixes:0,outs:0,wickets:0,runsConceded:0,oversBowled:0,wides:0,noballs:0,wins:0,highScore:0,bestWickets:0};}
+  // ADDED fifties + hundreds + fielding stats (catches, runOuts, runOutAssists, runOutsAgainst).
+  function ensure(name){if(!stats[name])stats[name]={name,matches:1,runs:0,balls:0,fours:0,sixes:0,outs:0,wickets:0,runsConceded:0,oversBowled:0,wides:0,noballs:0,wins:0,highScore:0,bestWickets:0,fifties:0,hundreds:0,catches:0,runOuts:0,runOutAssists:0,runOutsAgainst:0};}
   const i1Winner=G.inn[1]?G.inn[1].runs>G.inn[0].runs?G.teams[G.inn[1].bat].name:G.teams[G.inn[0].bat].name:'';
   [i1,...(i2?[i2]:[])].forEach(inn=>{
-    inn.batsmen.forEach(bt=>{ensure(bt.name);const a=stats[bt.name];a.runs+=bt.runs;a.balls+=bt.balls;a.fours+=bt.fours;a.sixes+=bt.sixes;if(bt.out)a.outs++;if(bt.runs>a.highScore)a.highScore=bt.runs;});
+    inn.batsmen.forEach(bt=>{
+      ensure(bt.name);
+      const a=stats[bt.name];
+      a.runs+=bt.runs;a.balls+=bt.balls;a.fours+=bt.fours;a.sixes+=bt.sixes;
+      if(bt.out)a.outs++;
+      if(bt.runs>a.highScore)a.highScore=bt.runs;
+      // Milestone count — higher takes precedence, never both
+      if(bt.runs>=100)a.hundreds++;
+      else if(bt.runs>=50)a.fifties++;
+    });
     inn.bowlers.forEach(bw=>{ensure(bw.name);const a=stats[bw.name];a.wickets+=bw.wickets;a.runsConceded+=bw.runs;a.oversBowled+=bw.legalBalls/6;a.wides+=bw.wides;a.noballs+=bw.noballs;if(bw.wickets>a.bestWickets)a.bestWickets=bw.wickets;});
+    // Fielding stats — derived from each wicket ball in the innings.
+    // (Caught: catcher gets +1 catch. RunOut: completer gets +1 runOut, thrower gets +1 assist, batsman gets +1 against.)
+    (inn.balls||[]).forEach(ball=>{
+      if(ball.type!=='wicket')return;
+      if(ball.how==='Caught'&&ball.catcher&&ball.catcher!=='Unknown'){
+        ensure(ball.catcher);
+        stats[ball.catcher].catches++;
+      }
+      if(ball.how==='RunOut'){
+        if(ball.completer){ensure(ball.completer);stats[ball.completer].runOuts++;}
+        if(ball.thrower){
+          ensure(ball.thrower);
+          // Direct-hit: same player listed as both thrower and completer — only count the runOut, not also the assist.
+          // (Cricket convention: a direct hit has no assist.)
+          if(ball.thrower!==ball.completer)stats[ball.thrower].runOutAssists++;
+        }
+        if(ball.batsmanIdx!=null){
+          const bt=inn.batsmen[ball.batsmanIdx];
+          if(bt){ensure(bt.name);stats[bt.name].runOutsAgainst++;}
+        }
+      }
+    });
   });
   Object.keys(stats).forEach(name=>{if(name===i1Winner)stats[name].wins=1;});
   return Object.values(stats);
@@ -2356,7 +3111,7 @@ function buildActiveMatchPayload(){
     ts:Date.now(),
     teams:[G.teams[0].name,G.teams[1].name],
     score,over:ov,innings:G.innings,
-    state:JSON.stringify({teams:G.teams,inn:G.inn,totalOvers:G.totalOvers,matchDate:G.matchDate,toss:G.toss,innings:G.innings,pmCounts:G.pmCounts,pendingNB:G.pendingNB,inningsBreak:G.inningsBreak,seriesId:G.seriesId,seriesMatchNum:G.seriesMatchNum,seriesData:G.seriesData,undoStack:recentUndo})
+    state:JSON.stringify({teams:G.teams,inn:G.inn,totalOvers:G.totalOvers,matchDate:G.matchDate,toss:G.toss,innings:G.innings,pmCounts:G.pmCounts,pendingNB:G.pendingNB,inningsBreak:G.inningsBreak,seriesId:G.seriesId,seriesMatchNum:G.seriesMatchNum,seriesData:G.seriesData,undoStack:recentUndo,matchMode:G.matchMode||'normal',playerWickets:G.playerWickets||[{},{}]})
   };
 }
 function autoSave(){
@@ -2703,10 +3458,17 @@ async function performRecovery(){
   // We need a tiny version of buildPlayerStats that uses our recovered state.
   function buildStatsFor(inns,teams){
     const stats={};
-    function ensure(name){if(!stats[name])stats[name]={name,matches:1,runs:0,balls:0,fours:0,sixes:0,outs:0,wickets:0,runsConceded:0,oversBowled:0,wides:0,noballs:0,wins:0,highScore:0,bestWickets:0};}
+    function ensure(name){if(!stats[name])stats[name]={name,matches:1,runs:0,balls:0,fours:0,sixes:0,outs:0,wickets:0,runsConceded:0,oversBowled:0,wides:0,noballs:0,wins:0,highScore:0,bestWickets:0,fifties:0,hundreds:0};}
     const i1Winner=inns[1]?inns[1].runs>inns[0].runs?teams[inns[1].bat].name:teams[inns[0].bat].name:'';
     inns.forEach(inn=>{
-      inn.batsmen.forEach(bt=>{ensure(bt.name);const a=stats[bt.name];a.runs+=bt.runs;a.balls+=bt.balls;a.fours+=bt.fours;a.sixes+=bt.sixes;if(bt.out)a.outs++;if(bt.runs>a.highScore)a.highScore=bt.runs;});
+      inn.batsmen.forEach(bt=>{
+        ensure(bt.name);const a=stats[bt.name];
+        a.runs+=bt.runs;a.balls+=bt.balls;a.fours+=bt.fours;a.sixes+=bt.sixes;
+        if(bt.out)a.outs++;
+        if(bt.runs>a.highScore)a.highScore=bt.runs;
+        if(bt.runs>=100)a.hundreds++;
+        else if(bt.runs>=50)a.fifties++;
+      });
       inn.bowlers.forEach(bw=>{ensure(bw.name);const a=stats[bw.name];a.wickets+=bw.wickets;a.runsConceded+=bw.runs;a.oversBowled+=bw.legalBalls/6;a.wides+=bw.wides;a.noballs+=bw.noballs;if(bw.wickets>a.bestWickets)a.bestWickets=bw.wickets;});
     });
     Object.keys(stats).forEach(name=>{if(name===i1Winner)stats[name].wins=1;});
@@ -2753,12 +3515,20 @@ let _activePoller=null;
 function startActiveMatchPoller(){
   stopActiveMatchPoller();
   _activePoller=setInterval(()=>{
-    // Only poll when home is the visible screen.
+    // Only poll when home is the visible screen and tab is visible.
+    if(document.hidden)return;
     const home=document.getElementById('home');
     if(home&&home.classList.contains('active'))checkActiveMatch();
-  },30000); // every 30s
+  },15000); // every 15s (was 30s — quicker pickup of matches started elsewhere)
 }
 function stopActiveMatchPoller(){if(_activePoller){clearInterval(_activePoller);_activePoller=null;}}
+// Re-check active match the instant the tab becomes visible again (user switched apps and back)
+document.addEventListener('visibilitychange',()=>{
+  if(!document.hidden){
+    const home=document.getElementById('home');
+    if(home&&home.classList.contains('active'))checkActiveMatch();
+  }
+});
 function getTimeAgo(ts){
   const diff=Date.now()-ts;const mins=Math.floor(diff/60000);
   if(mins<1)return'just now';
@@ -2792,6 +3562,8 @@ async function resumeMatch(){
     G.seriesMatchNum=saved.seriesMatchNum||1;
     G.seriesData=saved.seriesData||null;
     G.undoStack=Array.isArray(saved.undoStack)?saved.undoStack:[];
+    G.matchMode=saved.matchMode||'normal';
+    G.playerWickets=saved.playerWickets||[{},{}];
     document.getElementById('resume-card').classList.remove('show');
     goTo('match');
     render();
@@ -2808,12 +3580,15 @@ async function resumeMatch(){
   }catch(e){appAlert('Could not resume match.',{icon:'⚠️',title:'Resume Failed'});}
 }
 function confirmDiscard(){
-  appConfirm({
-    icon:'🗑',
-    title:'Discard Match',
-    message:'This active match will be deleted from both the cloud and this device. This cannot be undone.',
-    confirmText:'Discard',
-    onConfirm:discardMatch
+  // Password-gate the discard — accidental taps shouldn't be able to wipe an active match.
+  requirePw(()=>{
+    appConfirm({
+      icon:'🗑',
+      title:'Discard Match?',
+      message:'This active match will be deleted from both the cloud and this device. This cannot be undone.\n\nAll scoring done so far will be lost.',
+      confirmText:'Discard',
+      onConfirm:discardMatch
+    });
   });
 }
 async function discardMatch(){
@@ -2821,10 +3596,30 @@ async function discardMatch(){
     if(window._dbReady){try{await window._db.deleteActiveMatch();}catch(e){}}
     try{localStorage.removeItem(LOCAL_ACTIVE_KEY);}catch(e){}
     document.getElementById('resume-card').classList.remove('show');
+    _matchHistoryPushed=false; // reset back-guard
     syncMsg('Match discarded','ok');
   }catch(e){
     syncMsg('Could not discard: '+(e.message||'error'),'error');
   }
+}
+// Helper used by the conflict modal — password gate + delete + then run a callback.
+function discardActiveWithPw(thenCb){
+  requirePw(()=>{
+    appConfirm({
+      icon:'🗑',
+      title:'Discard Active Match?',
+      message:'Are you absolutely sure? The match in progress will be permanently deleted.',
+      confirmText:'Yes, discard',
+      onConfirm:async()=>{
+        if(window._dbReady){try{await window._db.deleteActiveMatch();}catch(e){}}
+        try{localStorage.removeItem(LOCAL_ACTIVE_KEY);}catch(e){}
+        document.getElementById('resume-card').classList.remove('show');
+        _matchHistoryPushed=false;
+        syncMsg('Active match discarded','ok');
+        if(thenCb)thenCb();
+      }
+    });
+  });
 }
 
 // ═══ SERIES ═══
@@ -2853,6 +3648,7 @@ async function createAndStartSeries(){
   G.totalOvers=overs;G.matchDate=d;G.innings=0;G.inn=[null,null];
   G.seriesId=seriesId;G.seriesMatchNum=1;G.seriesData={...payload,id:seriesId};
   G.inningsBreak=false;G.pendingNB=false;
+  G.matchMode='normal';G.playerWickets=[{},{}];
   clearUndoStack();
   showTossStep1();
   goTo('toss');
@@ -2925,6 +3721,7 @@ function confirmNextSeriesMatch(){
   G.matchDate=d;
   G.innings=0;G.inn=[null,null];
   G.inningsBreak=false;G.pendingNB=false;
+  G.matchMode='normal';G.playerWickets=[{},{}];
   clearUndoStack();
   showTossStep1();
   goTo('toss');
@@ -3150,6 +3947,8 @@ async function viewMatchById(id){
       seriesData:G.seriesData?JSON.parse(JSON.stringify(G.seriesData)):null,
       seriesMatchNum:G.seriesMatchNum,
       undoStack:G.undoStack.slice(),
+      matchMode:G.matchMode,
+      playerWickets:JSON.parse(JSON.stringify(G.playerWickets||[{},{}])),
     };
     // Mark viewing so autoSave won't write the historical data over the live record.
     G._viewing=true;
@@ -3158,6 +3957,9 @@ async function viewMatchById(id){
     _currentReportPartialNote=m.reconstructionNote||'';
     G.teams=saved.teams;G.inn=saved.inn;G.totalOvers=saved.totalOvers;G.matchDate=saved.matchDate;
     G.toss=saved.toss||{winner:0,choice:'bat'};G.innings=saved.inn[1]?1:0;
+    // Restore tenover context (otherwise the report renders without "2W" annotations etc).
+    G.matchMode=saved.matchMode||m.matchMode||'normal';
+    G.playerWickets=saved.playerWickets||[{},{}];
     showReport();
   }catch(e){appAlert('Could not load match.',{icon:'⚠️',title:'Load Failed'});}
 }
@@ -3178,6 +3980,8 @@ function restoreLiveState(){
   G.seriesData=_liveStateBackup.seriesData;
   G.seriesMatchNum=_liveStateBackup.seriesMatchNum;
   G.undoStack=_liveStateBackup.undoStack;
+  G.matchMode=_liveStateBackup.matchMode||'normal';
+  G.playerWickets=_liveStateBackup.playerWickets||[{},{}];
   _liveStateBackup=null;
   G._viewing=false;
   _currentReportPartial=false;
@@ -3268,7 +4072,24 @@ async function loadLeaderboard(){
       lbData=_lbDataCache;
     } else {
       const agg={};
-      lbMatches.forEach(m=>{if(!m.playerStats)return;m.playerStats.forEach(ps=>{const dispName=resolveName(ps.name);if(!agg[dispName])agg[dispName]={name:dispName,matches:0,runs:0,balls:0,fours:0,sixes:0,outs:0,wickets:0,runsConceded:0,oversBowled:0,wides:0,noballs:0,wins:0,highScore:0,bestWickets:0,matchRuns:[],matchWickets:[],matchDates:[]};const a=agg[dispName];a.matches++;a.runs+=ps.runs||0;a.balls+=ps.balls||0;a.fours+=ps.fours||0;a.sixes+=ps.sixes||0;a.outs+=ps.outs||0;a.wickets+=ps.wickets||0;a.runsConceded+=ps.runsConceded||0;a.oversBowled+=ps.oversBowled||0;a.wides+=ps.wides||0;a.noballs+=ps.noballs||0;a.wins+=ps.wins||0;if((ps.highScore||0)>a.highScore)a.highScore=ps.highScore||0;if((ps.bestWickets||0)>a.bestWickets)a.bestWickets=ps.bestWickets||0;a.matchRuns.push(ps.runs||0);a.matchWickets.push(ps.wickets||0);a.matchDates.push(m.date||'');});});
+      lbMatches.forEach(m=>{if(!m.playerStats)return;m.playerStats.forEach(ps=>{const dispName=resolveName(ps.name);if(!agg[dispName])agg[dispName]={name:dispName,matches:0,runs:0,balls:0,fours:0,sixes:0,outs:0,wickets:0,runsConceded:0,oversBowled:0,wides:0,noballs:0,wins:0,highScore:0,bestWickets:0,fifties:0,hundreds:0,catches:0,runOuts:0,runOutAssists:0,runOutsAgainst:0,matchRuns:[],matchWickets:[],matchDates:[]};const a=agg[dispName];a.matches++;a.runs+=ps.runs||0;a.balls+=ps.balls||0;a.fours+=ps.fours||0;a.sixes+=ps.sixes||0;a.outs+=ps.outs||0;a.wickets+=ps.wickets||0;a.runsConceded+=ps.runsConceded||0;a.oversBowled+=ps.oversBowled||0;a.wides+=ps.wides||0;a.noballs+=ps.noballs||0;a.wins+=ps.wins||0;if((ps.highScore||0)>a.highScore)a.highScore=ps.highScore||0;if((ps.bestWickets||0)>a.bestWickets)a.bestWickets=ps.bestWickets||0;
+        // Fielding stats — only present on matches saved with this update or later. Default to 0.
+        a.catches+=ps.catches||0;
+        a.runOuts+=ps.runOuts||0;
+        a.runOutAssists+=ps.runOutAssists||0;
+        a.runOutsAgainst+=ps.runOutsAgainst||0;
+        // Milestone backfill: for matches saved BEFORE this update, ps.fifties / ps.hundreds will be undefined.
+        // Fall back to ps.runs (which is the player's runs IN THIS MATCH only, since each match doc holds per-match player stats).
+        // Higher milestone wins — never both.
+        if(typeof ps.hundreds==='number'||typeof ps.fifties==='number'){
+          a.hundreds+=ps.hundreds||0;
+          a.fifties+=ps.fifties||0;
+        } else {
+          const r=ps.runs||0;
+          if(r>=100)a.hundreds++;
+          else if(r>=50)a.fifties++;
+        }
+        a.matchRuns.push(ps.runs||0);a.matchWickets.push(ps.wickets||0);a.matchDates.push(m.date||'');});});
       lbData=Object.values(agg);
       _lbDataCache=lbData;
       _lbCacheKey=fp;
@@ -3286,7 +4107,7 @@ function getLeads(p){
   const topWin=lbData.reduce((a,b)=>b.wins>a.wins?b:a,lbData[0]);if(topWin.name===p.name&&p.wins>0)leads.push('🏆 Most Wins');
   return leads;
 }
-function renderLbTab(name){if(!lbData)return;if(name==='batting')renderBattingTab();if(name==='bowling')renderBowlingTab();if(name==='allround')renderAllRoundTab();}
+function renderLbTab(name){if(!lbData)return;if(name==='batting')renderBattingTab();if(name==='bowling')renderBowlingTab();if(name==='allround')renderAllRoundTab();if(name==='fielding')renderFieldingTab();}
 function renderPodium(sorted,valFn,subFn,container){
   if(sorted.length<1)return;const p1=sorted[0],p2=sorted[1]||null,p3=sorted[2]||null;const pod=document.createElement('div');pod.className='podium';
   const makeItem=(p,rank,cls)=>{if(!p)return null;const d=document.createElement('div');d.className=`podium-item ${cls}`;d.innerHTML=`<div class="podium-card"><div class="podium-rank">${rank===1?'🥇':rank===2?'🥈':'🥉'}</div><div class="podium-name">${esc(resolveName(p.name))}</div><div class="podium-val">${valFn(p)}</div><div class="podium-sub">${subFn(p)}</div></div>`;d.onclick=()=>openSheet(p);return d;};
@@ -3301,9 +4122,10 @@ function renderBattingTab(){
   renderPodium(sorted,p=>p.runs,p=>`avg ${p.outs>0?(p.runs/p.outs).toFixed(2):'—'}`,el);
   const sec=document.createElement('div');sec.className='rpt-sec';
   sec.innerHTML='<div class="rpt-sec-head">Batting — All Time</div>';
-  // header row
-  const hdr=document.createElement('div');hdr.style.cssText='display:grid;grid-template-columns:28px 1fr 44px 44px 44px 44px 44px;gap:4px;padding:6px 13px;border-bottom:1px solid var(--border)';
-  hdr.innerHTML=`<div></div><div style="font-size:9px;letter-spacing:1px;color:var(--muted);text-transform:uppercase">Player</div><div style="font-size:9px;letter-spacing:1px;color:var(--gold);text-transform:uppercase;text-align:right">Runs</div><div style="font-size:9px;letter-spacing:1px;color:var(--gold);text-transform:uppercase;text-align:right">HS</div><div style="font-size:9px;letter-spacing:1px;color:var(--accent);text-transform:uppercase;text-align:right">Avg</div><div style="font-size:9px;letter-spacing:1px;color:var(--green);text-transform:uppercase;text-align:right">SR</div><div style="font-size:9px;letter-spacing:1px;color:var(--gold);text-transform:uppercase;text-align:right">6s</div>`;
+  // header row — added 50s/100s columns. Grid: rank | name | Runs | HS | Avg | SR | 50 | 100
+  const gridCols='28px 1fr 44px 38px 44px 38px 32px 32px';
+  const hdr=document.createElement('div');hdr.style.cssText=`display:grid;grid-template-columns:${gridCols};gap:4px;padding:6px 13px;border-bottom:1px solid var(--border)`;
+  hdr.innerHTML=`<div></div><div style="font-size:9px;letter-spacing:1px;color:var(--muted);text-transform:uppercase">Player</div><div style="font-size:9px;letter-spacing:1px;color:var(--gold);text-transform:uppercase;text-align:right">Runs</div><div style="font-size:9px;letter-spacing:1px;color:var(--gold);text-transform:uppercase;text-align:right">HS</div><div style="font-size:9px;letter-spacing:1px;color:var(--accent);text-transform:uppercase;text-align:right">Avg</div><div style="font-size:9px;letter-spacing:1px;color:var(--green);text-transform:uppercase;text-align:right">SR</div><div style="font-size:9px;letter-spacing:1px;color:var(--accent);text-transform:uppercase;text-align:right">50</div><div style="font-size:9px;letter-spacing:1px;color:var(--gold);text-transform:uppercase;text-align:right">100</div>`;
   sec.appendChild(hdr);
   sorted.forEach((p,i)=>{
     const avg=p.outs>0?(p.runs/p.outs).toFixed(2):'—';
@@ -3312,8 +4134,8 @@ function renderBattingTab(){
     const rankEl=i===0?'🥇':i===1?'🥈':i===2?'🥉':`<span style="font-size:12px;color:var(--muted)">${i+1}</span>`;
     const row=document.createElement('div');
     row.className='lb-table-row';row.setAttribute('data-pname',p.name);
-    row.style.cssText='display:grid;grid-template-columns:28px 1fr 44px 44px 44px 44px 44px;gap:4px;padding:10px 13px;align-items:center;border-bottom:1px solid var(--border);cursor:pointer';
-    row.innerHTML=`<div style="text-align:center;font-size:16px">${rankEl}</div><div><div style="font-size:14px;font-weight:700;color:var(--white)">${esc(resolveName(p.name))}</div><div style="font-size:10px;color:var(--accent);opacity:.8;margin-top:1px">${p.matches} mat · ${p.wins}W</div>${badgesHtml}</div><div style="font-family:var(--mono);font-size:13px;font-weight:700;color:${i===0?'var(--gold)':'var(--white)'};text-align:right">${p.runs}</div><div style="font-family:var(--mono);font-size:13px;color:var(--gold);text-align:right">${p.highScore}</div><div style="font-family:var(--mono);font-size:13px;color:var(--white);text-align:right">${avg}</div><div style="font-family:var(--mono);font-size:13px;color:var(--green);text-align:right">${sr}</div><div style="font-family:var(--mono);font-size:13px;color:var(--gold);text-align:right">${p.sixes}</div>`;
+    row.style.cssText=`display:grid;grid-template-columns:${gridCols};gap:4px;padding:10px 13px;align-items:center;border-bottom:1px solid var(--border);cursor:pointer`;
+    row.innerHTML=`<div style="text-align:center;font-size:16px">${rankEl}</div><div><div style="font-size:14px;font-weight:700;color:var(--white)">${esc(resolveName(p.name))}</div><div style="font-size:10px;color:var(--accent);opacity:.8;margin-top:1px">${p.matches} mat · ${p.wins}W</div>${badgesHtml}</div><div style="font-family:var(--mono);font-size:13px;font-weight:700;color:${i===0?'var(--gold)':'var(--white)'};text-align:right">${p.runs}</div><div style="font-family:var(--mono);font-size:13px;color:var(--gold);text-align:right">${p.highScore}</div><div style="font-family:var(--mono);font-size:13px;color:var(--white);text-align:right">${avg}</div><div style="font-family:var(--mono);font-size:13px;color:var(--green);text-align:right">${sr}</div><div style="font-family:var(--mono);font-size:13px;color:var(--accent);text-align:right">${p.fifties||0}</div><div style="font-family:var(--mono);font-size:13px;color:var(--gold);text-align:right">${p.hundreds||0}</div>`;
     sec.appendChild(row);
   });
   el.appendChild(sec);
@@ -3371,6 +4193,32 @@ function renderAllRoundTab(){
     sec.appendChild(row);
   });
   sec.innerHTML+=`<div style="padding:8px 11px;font-size:10px;color:var(--muted)">Rating = (Runs×0.5) + (Wickets×15) + (6s×3) − (Wides×2) − (NoBalls×2). Tap any row to view player profile.</div>`;
+  el.appendChild(sec);
+}
+
+function renderFieldingTab(){
+  const el=document.getElementById('tc-fielding');el.innerHTML='';
+  // Total fielding "impact" = catches*2 + runOuts*2 + runOutAssists (assists worth less than direct involvement)
+  const scored=lbData.map(p=>({
+    ...p,
+    fieldingImpact:((p.catches||0)*2)+((p.runOuts||0)*2)+((p.runOutAssists||0)*1)
+  })).sort((a,b)=>b.fieldingImpact-a.fieldingImpact||b.catches-a.catches||b.runOuts-a.runOuts);
+  renderPodium(scored,p=>p.fieldingImpact,p=>`${p.catches||0}c · ${p.runOuts||0}ro · ${p.runOutAssists||0}a`,el);
+  const sec=document.createElement('div');sec.className='rpt-sec';
+  sec.innerHTML='<div class="rpt-sec-head">Fielding — All Time</div>';
+  const gridCols='28px 1fr 38px 40px 36px 38px';
+  const hdr=document.createElement('div');hdr.style.cssText=`display:grid;grid-template-columns:${gridCols};gap:4px;padding:6px 13px;border-bottom:1px solid var(--border)`;
+  hdr.innerHTML=`<div></div><div style="font-size:9px;letter-spacing:1px;color:var(--muted);text-transform:uppercase">Player</div><div style="font-size:9px;letter-spacing:1px;color:var(--green);text-transform:uppercase;text-align:right">Ctch</div><div style="font-size:9px;letter-spacing:1px;color:var(--gold);text-transform:uppercase;text-align:right">RO</div><div style="font-size:9px;letter-spacing:1px;color:var(--accent);text-transform:uppercase;text-align:right">Ast</div><div style="font-size:9px;letter-spacing:1px;color:var(--red);text-transform:uppercase;text-align:right">vs</div>`;
+  sec.appendChild(hdr);
+  scored.forEach((p,i)=>{
+    const rankEl=i===0?'🥇':i===1?'🥈':i===2?'🥉':`<span style="font-size:12px;color:var(--muted)">${i+1}</span>`;
+    const row=document.createElement('div');
+    row.className='lb-table-row';row.setAttribute('data-pname',p.name);
+    row.style.cssText=`display:grid;grid-template-columns:${gridCols};gap:4px;padding:10px 13px;align-items:center;border-bottom:1px solid var(--border);cursor:pointer`;
+    row.innerHTML=`<div style="text-align:center;font-size:16px">${rankEl}</div><div><div style="font-size:14px;font-weight:700;color:var(--white)">${esc(resolveName(p.name))}</div><div style="font-size:10px;color:var(--accent);opacity:.8;margin-top:1px">${p.matches} mat · ${p.fieldingImpact} impact</div></div><div style="font-family:var(--mono);font-size:13px;color:var(--green);text-align:right">${p.catches||0}</div><div style="font-family:var(--mono);font-size:13px;color:var(--gold);text-align:right">${p.runOuts||0}</div><div style="font-family:var(--mono);font-size:13px;color:var(--accent);text-align:right">${p.runOutAssists||0}</div><div style="font-family:var(--mono);font-size:13px;color:var(--red);text-align:right">${p.runOutsAgainst||0}</div>`;
+    sec.appendChild(row);
+  });
+  sec.innerHTML+=`<div style="padding:8px 11px;font-size:10px;color:var(--muted);line-height:1.5">Ctch = catches taken · RO = run outs completed · Ast = run-out assists · vs = times you were run out. Impact = catches×2 + runOuts×2 + assists.</div>`;
   el.appendChild(sec);
 }
 
@@ -3604,7 +4452,7 @@ function formatH2HSection(focusName){
 
 function buildSheetHTML(p){
   const avg=p.outs>0?(p.runs/p.outs).toFixed(2):'—';const sr=p.balls>0?((p.runs/p.balls)*100).toFixed(0):'—';const eco=p.oversBowled>0?(p.runsConceded/p.oversBowled).toFixed(2):'—';const bavg=p.wickets>0?(p.runsConceded/p.wickets).toFixed(2):'—';const winPct=p.matches>0?((p.wins/p.matches)*100).toFixed(0)+'%':'—';const leads=getLeads(p);const badgesHtml=leads.length>0?`<div class="sheet-badges">${leads.map(l=>`<div class="sheet-badge">${l}</div>`).join('')}</div>`:'';
-  return`<div class="sheet-top"><div class="sheet-pname">${esc(resolveName(p.name))}</div><div class="sheet-psummary">${p.runs} runs · ${p.wickets} wickets · ${p.matches} matches</div>${badgesHtml}</div><div class="stats-grid"><div class="stat-box"><div class="stat-box-label">Matches</div><div class="stat-box-val acc">${p.matches}</div></div><div class="stat-box"><div class="stat-box-label">Wins</div><div class="stat-box-val gold">${p.wins}</div></div><div class="stat-box"><div class="stat-box-label">Win %</div><div class="stat-box-val">${winPct}</div></div><div class="stat-box"><div class="stat-box-label">Runs</div><div class="stat-box-val gold">${p.runs}</div></div><div class="stat-box"><div class="stat-box-label">Bat Avg</div><div class="stat-box-val">${avg}</div></div><div class="stat-box"><div class="stat-box-label">Strike Rate</div><div class="stat-box-val">${sr}</div></div><div class="stat-box"><div class="stat-box-label">Wickets</div><div class="stat-box-val green">${p.wickets}</div></div><div class="stat-box"><div class="stat-box-label">Economy</div><div class="stat-box-val">${eco}</div></div><div class="stat-box"><div class="stat-box-label">Bowl Avg</div><div class="stat-box-val">${bavg}</div></div><div class="stat-box"><div class="stat-box-label">Sixes</div><div class="stat-box-val gold">${p.sixes}</div></div><div class="stat-box"><div class="stat-box-label">Fours</div><div class="stat-box-val">${p.fours}</div></div><div class="stat-box"><div class="stat-box-label">Wides</div><div class="stat-box-val" style="color:var(--purple)">${p.wides}</div></div><div class="stat-box"><div class="stat-box-label">No Balls</div><div class="stat-box-val" style="color:var(--orange)">${p.noballs}</div></div><div class="stat-box"><div class="stat-box-label">Best Score</div><div class="stat-box-val gold">${p.highScore}</div></div><div class="stat-box"><div class="stat-box-label">Best Bowl</div><div class="stat-box-val green">${p.bestWickets}w</div></div></div><div class="best-match-section"><div class="rpt-sec-head" style="margin-bottom:8px">Best Performances</div><div class="best-match-card"><div class="best-match-title">🏏 Best Batting</div><div class="best-match-row"><div class="best-match-label">Highest Score</div><div class="best-match-val">${p.highScore} runs</div></div><div class="best-match-title" style="margin-top:10px">🎯 Best Bowling</div><div class="best-match-row"><div class="best-match-label">Most Wickets in a match</div><div class="best-match-val">${p.bestWickets} wickets</div></div></div></div>${formatH2HSection(p.name)}`;
+  return`<div class="sheet-top"><div class="sheet-pname">${esc(resolveName(p.name))}</div><div class="sheet-psummary">${p.runs} runs · ${p.wickets} wickets · ${p.matches} matches</div>${badgesHtml}</div><div class="stats-grid"><div class="stat-box"><div class="stat-box-label">Matches</div><div class="stat-box-val acc">${p.matches}</div></div><div class="stat-box"><div class="stat-box-label">Wins</div><div class="stat-box-val gold">${p.wins}</div></div><div class="stat-box"><div class="stat-box-label">Win %</div><div class="stat-box-val">${winPct}</div></div><div class="stat-box"><div class="stat-box-label">Runs</div><div class="stat-box-val gold">${p.runs}</div></div><div class="stat-box"><div class="stat-box-label">Bat Avg</div><div class="stat-box-val">${avg}</div></div><div class="stat-box"><div class="stat-box-label">Strike Rate</div><div class="stat-box-val">${sr}</div></div><div class="stat-box"><div class="stat-box-label">50s</div><div class="stat-box-val acc">${p.fifties||0}</div></div><div class="stat-box"><div class="stat-box-label">100s</div><div class="stat-box-val gold">${p.hundreds||0}</div></div><div class="stat-box"><div class="stat-box-label">Wickets</div><div class="stat-box-val green">${p.wickets}</div></div><div class="stat-box"><div class="stat-box-label">Economy</div><div class="stat-box-val">${eco}</div></div><div class="stat-box"><div class="stat-box-label">Bowl Avg</div><div class="stat-box-val">${bavg}</div></div><div class="stat-box"><div class="stat-box-label">Sixes</div><div class="stat-box-val gold">${p.sixes}</div></div><div class="stat-box"><div class="stat-box-label">Fours</div><div class="stat-box-val">${p.fours}</div></div><div class="stat-box"><div class="stat-box-label">Wides</div><div class="stat-box-val" style="color:var(--purple)">${p.wides}</div></div><div class="stat-box"><div class="stat-box-label">No Balls</div><div class="stat-box-val" style="color:var(--orange)">${p.noballs}</div></div><div class="stat-box"><div class="stat-box-label">Catches</div><div class="stat-box-val green">${p.catches||0}</div></div><div class="stat-box"><div class="stat-box-label">Run Outs</div><div class="stat-box-val gold">${p.runOuts||0}</div></div><div class="stat-box"><div class="stat-box-label">RO Assists</div><div class="stat-box-val acc">${p.runOutAssists||0}</div></div><div class="stat-box"><div class="stat-box-label">RO Against</div><div class="stat-box-val" style="color:var(--red)">${p.runOutsAgainst||0}</div></div><div class="stat-box"><div class="stat-box-label">Best Score</div><div class="stat-box-val gold">${p.highScore}</div></div><div class="stat-box"><div class="stat-box-label">Best Bowl</div><div class="stat-box-val green">${p.bestWickets}w</div></div></div><div class="best-match-section"><div class="rpt-sec-head" style="margin-bottom:8px">Best Performances</div><div class="best-match-card"><div class="best-match-title">🏏 Best Batting</div><div class="best-match-row"><div class="best-match-label">Highest Score</div><div class="best-match-val">${p.highScore} runs</div></div><div class="best-match-title" style="margin-top:10px">🎯 Best Bowling</div><div class="best-match-row"><div class="best-match-label">Most Wickets in a match</div><div class="best-match-val">${p.bestWickets} wickets</div></div></div></div>${formatH2HSection(p.name)}`;
 }
 
 // ═══ INIT ═══
@@ -3614,6 +4462,8 @@ try{const raw=localStorage.getItem('gc-aliases');if(raw)_aliases=JSON.parse(raw)
 updateNetDot(navigator.onLine===false?'offline':'connecting');
 window.addEventListener('dbready',async()=>{
   await loadAliases();
+  // One-time migration: promote legacy per-device active_match docs to the shared 'current' slot
+  try{if(window._db.migrateLegacyActiveMatch)await window._db.migrateLegacyActiveMatch();}catch(e){}
   // Pre-load matches so the chooser has the full name pool from the very first time setup is opened
   try{if(window._dbReady)lbMatches=await window._db.getMatches();}catch(e){}
   // Sync local→cloud if local has newer unsaved progress
@@ -3625,6 +4475,7 @@ window.addEventListener('dbready',async()=>{
 if(window._dbReady){
   (async()=>{
     await loadAliases();
+    try{if(window._db.migrateLegacyActiveMatch)await window._db.migrateLegacyActiveMatch();}catch(e){}
     try{lbMatches=await window._db.getMatches();}catch(e){}
     await syncLocalToCloudIfNewer();
     loadHomeRecent();checkActiveMatch();startActiveMatchPoller();
