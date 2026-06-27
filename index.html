@@ -557,8 +557,8 @@ td.g{color:var(--green)}td.gl{color:var(--gold)}td.mu{color:var(--muted)}td.ac{c
 .net-dot.offline{background:var(--red);box-shadow:0 0 8px var(--red)}
 .net-dot.connecting{background:var(--orange);box-shadow:0 0 8px var(--orange)}
 /* SAVE NOW BUTTON */
-.save-now-btn{position:fixed;top:14px;right:14px;z-index:550;padding:8px 14px;background:var(--greendim);border:1.5px solid var(--green);color:var(--green);border-radius:18px;font-family:var(--font);font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;display:none;box-shadow:0 4px 14px rgba(0,0,0,.35)}
-.save-now-btn:active{transform:scale(.92)}
+.save-now-btn{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:550;padding:10px 18px;background:var(--greendim);border:1.5px solid var(--green);color:var(--green);border-radius:22px;font-family:var(--font);font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;display:none;box-shadow:0 4px 14px rgba(0,0,0,.45)}
+.save-now-btn:active{transform:translateX(-50%) scale(.94)}
 .save-now-btn.show{display:block}
 .save-now-btn.saving{background:var(--orangedim);border-color:var(--orange);color:var(--orange)}
 /* RECOVERY BUTTON */
@@ -1785,6 +1785,12 @@ function doActualBack(){
   if(!cur||!prevEl)return;
   cur.style.transform='translateX(100%)';prevEl.style.transform='translateX(-30%)';prevEl.classList.add('active');
   requestAnimationFrame(()=>{prevEl.style.transform='';setTimeout(()=>{cur.classList.remove('active');cur.style.transform='';},260);});
+  // Hide the Save Now button if we just left the match screen
+  const saveBtn=document.getElementById('save-now-btn');
+  if(saveBtn&&prev!=='match')saveBtn.classList.remove('show');
+  if(saveBtn&&prev==='match')saveBtn.classList.add('show');
+  // Apply tenover UI flags if we landed back on the match screen
+  if(prev==='match')applyTenoverUiFlags();
   if(prev==='home'){loadHomeRecent();checkActiveMatch();}
 }
 // Returns true if both innings are done OR it's a result-overlay state. Lets the back guard
@@ -1836,13 +1842,13 @@ window.addEventListener('popstate',()=>{
 
 // ═══ PLUS/MINUS ═══
 // Show/hide tenover-only buttons (2 and 3 runs, Run Out) based on current matchMode.
-// Each element knows its own default display via data-default-display or its class.
 function applyTenoverUiFlags(){
   const show=G.matchMode==='tenover';
   document.querySelectorAll('.tenover-only').forEach(el=>{
     if(!show){el.style.display='none';return;}
-    // For runs-grid and dismiss-grid we want 'grid'; for the batter-row non-striker we want 'block'.
+    // The runs-grid / dismiss-grid use CSS grid layout; the non-striker batter-row uses flex.
     if(el.classList.contains('runs-grid')||el.classList.contains('dismiss-grid'))el.style.display='grid';
+    else if(el.classList.contains('batter-row'))el.style.display='flex';
     else el.style.display='block';
   });
   // Non-striker row visibility ultimately controlled by render(); reset display only if tenover OFF.
@@ -2016,11 +2022,6 @@ function proceedToToss(){
 }
 
 // ═══ TENOVER MATCH SETUP ═══
-// Cap a chooser surface to a max number of selections (used for tenover where teams max out at 3 players).
-function pcEnforceMax(key,max){
-  const sel=_pcSel[key];
-  if(sel.length>max)sel.length=max;
-}
 function proceedToDWAssign(){
   const tA=document.getElementById('to-ta-name').value.trim()||'Team A';
   const tB=document.getElementById('to-tb-name').value.trim()||'Team B';
@@ -2197,10 +2198,15 @@ function addBall(ball){
       if(ball.runs===6)haptic(HAPTIC.six);
       else if(ball.runs===4)haptic(HAPTIC.four);
       if((runsBefore<50&&bt.runs>=50)||(runsBefore<100&&bt.runs>=100)){setTimeout(()=>haptic(HAPTIC.milestone),250);}
-      inn.nextFH=true;inn.balls.push(nbBall);render();autoSave();return;
+      inn.nextFH=true;inn.balls.push(nbBall);
+      // Tenover strike rotation on runs scored off a no-ball (bat runs count for rotation).
+      // No-ball itself is not a legal delivery, so no over-end rotation here.
+      if(G.matchMode==='tenover'&&strikeChangesOnRuns(ball.runs))swapStrike(inn);
+      render();autoSave();return;
     }
     // Anything else — block with a clear alert. User must resolve the pending NB first.
-    appAlert('You have a pending No Ball. Tap 0, 1, 4, or 6 for the runs scored off it, or tap Undo to cancel.',{icon:'🦶',title:'Pending No Ball'});
+    const runHint=G.matchMode==='tenover'?'0, 1, 2, 3, 4, or 6':'0, 1, 4, or 6';
+    appAlert(`You have a pending No Ball. Tap ${runHint} for the runs scored off it, or tap Undo to cancel.`,{icon:'🦶',title:'Pending No Ball'});
     return;
   }
 
@@ -2242,7 +2248,7 @@ function addBall(ball){
 
 function wicket(how){
   const inn=ci();if(!inn)return;
-  if(G.pendingNB){appAlert('You have a pending No Ball. Tap 0, 1, 4, or 6 first, or tap Undo to cancel.',{icon:'🦶',title:'Pending No Ball'});return;}
+  if(G.pendingNB){const runHint=G.matchMode==='tenover'?'0, 1, 2, 3, 4, or 6':'0, 1, 4, or 6';appAlert(`You have a pending No Ball. Tap ${runHint} first, or tap Undo to cancel.`,{icon:'🦶',title:'Pending No Ball'});return;}
   if(inn.currentBowlerIdx===null&&how!=='Retired'){appAlert('Select a bowler first!',{icon:'🎯',title:'Pick a Bowler'});return;}
   // Free hit only blocks delivery-based dismissals. Retired Out is a between-balls action and is always allowed.
   // Free hit only blocks delivery-based dismissals. Retired Out and Run Out are exceptions:
@@ -2256,7 +2262,15 @@ function wicket(how){
 
 function doWicket(how,catcher,extra){
   // extra is an optional object: { thrower, completer } for RunOut.
-  const inn=ci();const bw=inn.currentBowlerIdx!==null?inn.bowlers[inn.currentBowlerIdx]:null;const bt=inn.batsmen[inn.currentBatterPlayerIdx];
+  const inn=ci();const bw=inn.currentBowlerIdx!==null?inn.bowlers[inn.currentBowlerIdx]:null;
+  // Defensive: if no batsman is at the crease (between balls / mid-selector), bail out silently.
+  // This can happen if the user rapid-taps a dismissal button after a previous wicket fully advanced.
+  if(inn.currentBatterPlayerIdx===null||inn.currentBatterPlayerIdx===undefined||inn.currentBatterPlayerIdx>=inn.batsmen.length){
+    syncMsg('No batsman at the crease','error');
+    return;
+  }
+  const bt=inn.batsmen[inn.currentBatterPlayerIdx];
+  if(!bt){syncMsg('No batsman at the crease','error');return;}
   snapshot();
   const isRetired=(how==='Retired');
   const isRunOut=(how==='RunOut');
@@ -2278,7 +2292,11 @@ function doWicket(how,catcher,extra){
   // RunOut: legal ball happened, but bowler does NOT get the wicket credit (cricket rule).
   if(!isRetired&&!isRunOut&&bw)bw.wickets++;
   inn.wickets++;
-  const ball={type:'wicket',how,catcher:catcher||'',fh:false,over:inn.currentOver,bowlerIdx:isRetired?null:inn.currentBowlerIdx,batsmanIdx:inn.currentBatterPlayerIdx,legal:!isRetired,id:nextBallId(),isFirstDismissalOfDW,doubleWicketContinued:false};
+  // Free hit indicator on the ball: TRUE for run outs that happened on a free hit (the one legal dismissal).
+  // For Retired Out (between balls), free hit doesn't apply. For other wicket types, the fh nextFH check
+  // earlier in `wicket()` already blocked the tap.
+  const fhOnThisBall=(isRunOut&&inn.nextFH);
+  const ball={type:'wicket',how,catcher:catcher||'',fh:fhOnThisBall,over:inn.currentOver,bowlerIdx:isRetired?null:inn.currentBowlerIdx,batsmanIdx:inn.currentBatterPlayerIdx,legal:!isRetired,id:nextBallId(),isFirstDismissalOfDW,doubleWicketContinued:false};
   if(isRunOut&&extra){ball.thrower=extra.thrower||'';ball.completer=extra.completer||'';}
   inn.balls.push(ball);
   if(!isRetired){
@@ -2436,6 +2454,12 @@ function undoLast(){
   }
   const ok=restoreSnapshot();
   if(!ok)return;
+  // BUG FIX: if the Double-Wicket choice modal was open when user tapped undo, close it.
+  // (The wicket the modal referred to is now rolled back, so the modal is stale.)
+  const dwc=document.getElementById('mod-dwchoice');
+  if(dwc&&dwc.classList.contains('show')){dwc.classList.remove('show');_dwcContext=null;}
+  // Also close any other live-input modals so they don't reference stale state
+  const ro=document.getElementById('mod-runout');if(ro&&ro.classList.contains('show')){ro.classList.remove('show');_roSelectedThrower=null;_roSelectedCompleter=null;}
   render();
   autoSave();
   // If after restore the next batsman needs to be picked (e.g. user undid a wrong pick after a wicket), prompt.
@@ -2475,7 +2499,10 @@ function replayBall(b){
     inn.runs+=1+runsOnBall;inn.extras.noballs++;inn.extras.total++;
     if(bw){bw.runs+=1+runsOnBall;bw.noballs++;}
     if(b.batsmanIdx!==undefined&&b.batsmanIdx!==null){const bt=inn.batsmen[b.batsmanIdx];if(bt){bt.runs+=runsOnBall;bt.balls++;if(runsOnBall===4)bt.fours++;if(runsOnBall===6)bt.sixes++;}}
-    inn.nextFH=true;return;
+    inn.nextFH=true;
+    // Tenover strike rotation on runs scored off a no-ball
+    if(G.matchMode==='tenover'&&strikeChangesOnRuns(runsOnBall))swapStrike(inn);
+    return;
   }
   inn.nextFH=false;
   if(b.batsmanIdx!==undefined&&b.batsmanIdx!==null){if(!inn.battingSequence.includes(b.batsmanIdx))inn.battingSequence.push(b.batsmanIdx);inn.currentBatterPlayerIdx=b.batsmanIdx;}
@@ -2760,14 +2787,14 @@ function render(){
       const nWTag=(nbt.initialWickets||1)===2?' [2W]':' [1W]';
       document.getElementById('m-nonstriker').textContent=resolveName(nbt.name)+(nIsCapt?' (C)':'')+nWTag;
       document.getElementById('m-nonstriker-stats').textContent=`${nbt.runs}r · ${nbt.balls}b · at non-striker end`;
-      nsRow.style.display='block';
+      nsRow.style.display='flex';
     } else if(G.matchMode==='tenover'&&inn.waitingDWReturn!==null&&inn.waitingDWReturn!==undefined){
       // No active non-striker but a 2W player is parked waiting to return
       const wbt=inn.batsmen[inn.waitingDWReturn];
       if(wbt){
         document.getElementById('m-nonstriker').textContent=`⏳ ${resolveName(wbt.name)} (waiting for 2nd wicket)`;
         document.getElementById('m-nonstriker-stats').textContent=`${wbt.runs}r · ${wbt.balls}b`;
-        nsRow.style.display='block';
+        nsRow.style.display='flex';
       } else {
         nsRow.style.display='none';
       }
@@ -2900,8 +2927,15 @@ function showReport(){
     let brows=ordered.map(({bt,i:si})=>{
       const isCapt=si===0;let howOut='not out';if(bt.balls===0&&!bt.out)howOut='did not bat';
       if(bt.out){
-        const wb=inn.balls.find(b=>b.type==='wicket'&&b.batsmanIdx===si&&(b.doubleWicketContinued!==true));
-        const bn=wb&&wb.bowlerIdx!==null?inn.bowlers[wb.bowlerIdx].name:'?';
+        // BUG FIX: in tenover, a 2W player may have multiple wicket balls (swap → return → full out).
+        // We need the LAST non-continued wicket ball — that's the one that fully dismissed them.
+        // Plain .find() returns the FIRST match (the swap), giving wrong bowler.
+        let wb=null;
+        for(let bi=inn.balls.length-1;bi>=0;bi--){
+          const bb=inn.balls[bi];
+          if(bb.type==='wicket'&&bb.batsmanIdx===si&&bb.doubleWicketContinued!==true){wb=bb;break;}
+        }
+        const bn=wb&&wb.bowlerIdx!==null&&wb.bowlerIdx!==undefined?inn.bowlers[wb.bowlerIdx].name:'?';
         if(bt.howOut==='Caught')howOut=`c ${bt.catcher||'?'} b ${bn}`;
         else if(bt.howOut==='Bowled')howOut=`b ${bn}`;
         else if(bt.howOut==='RunOut'){
@@ -3577,6 +3611,23 @@ async function resumeMatch(){
     }
     const inn=ci();
     if(inn&&inn.currentBatterPlayerIdx===null&&inn.currentBatsmanIdx<inn.batsmen.length)setTimeout(()=>showBatsmanSelector(),350);
+    // BUG RECOVERY (tenover): page reloaded between opener pick and non-striker pick.
+    // Detect: striker is set, battingSequence has exactly 1 entry, nonStrikerPlayerIdx is still null.
+    if(G.matchMode==='tenover'&&inn&&inn.currentBatterPlayerIdx!==null&&inn.battingSequence.length===1&&(inn.nonStrikerPlayerIdx===null||inn.nonStrikerPlayerIdx===undefined)){
+      const remaining=inn.batsmen.filter((b,i)=>!inn.battingSequence.includes(i)&&(b.wicketsLeft||0)>0);
+      if(remaining.length>0)setTimeout(()=>showBatsmanSelector(),500);
+    }
+    // BUG RECOVERY: page may have reloaded mid-modal during a Double-Wicket choice.
+    // Detect by: last ball is a 2W first-dismissal that wasn't continued AND the dismissed batsman is still at strike.
+    if(G.matchMode==='tenover'&&inn&&inn.balls.length>0){
+      const last=inn.balls[inn.balls.length-1];
+      if(last&&last.type==='wicket'&&last.isFirstDismissalOfDW&&!last.doubleWicketContinued&&inn.currentBatterPlayerIdx===last.batsmanIdx){
+        const dismissed=inn.batsmen[last.batsmanIdx];
+        if(dismissed&&(dismissed.wicketsLeft||0)===1){
+          setTimeout(()=>showDoubleWicketChoice(last,dismissed),500);
+        }
+      }
+    }
   }catch(e){appAlert('Could not resume match.',{icon:'⚠️',title:'Resume Failed'});}
 }
 function confirmDiscard(){
@@ -4045,7 +4096,9 @@ async function deleteSeriesNow(id){
 let prevTabIdx=0;
 function switchTab(name,idx){
   const prev=lbTabIdx;lbTabIdx=idx;lbTab=name;
-  ['batting','bowling','allround'].forEach(t=>{document.getElementById(`tc-${t}`).classList.remove('active');document.getElementById(`tab-${t}`).classList.remove('active');});
+  // BUG FIX: 'fielding' was missing from this list, which left tc-fielding with the .active
+  // class still attached when switching to other tabs — causing it to render underneath them.
+  ['batting','bowling','allround','fielding'].forEach(t=>{document.getElementById(`tc-${t}`).classList.remove('active');document.getElementById(`tab-${t}`).classList.remove('active');});
   const el=document.getElementById(`tc-${name}`);el.style.setProperty('--tab-from',`${(idx>prev?1:-1)*30}px`);el.classList.add('active');document.getElementById(`tab-${name}`).classList.add('active');
   document.getElementById('tab-indicator').style.transform=`translateX(${idx*100}%)`;
   renderLbTab(name);
@@ -4089,7 +4142,44 @@ async function loadLeaderboard(){
           if(r>=100)a.hundreds++;
           else if(r>=50)a.fifties++;
         }
-        a.matchRuns.push(ps.runs||0);a.matchWickets.push(ps.wickets||0);a.matchDates.push(m.date||'');});});
+        a.matchRuns.push(ps.runs||0);a.matchWickets.push(ps.wickets||0);a.matchDates.push(m.date||'');});
+        // FIELDING BACKFILL: matches saved before this update have no catches/runOuts in their playerStats.
+        // Walk matchData.inn[*].balls to compute them retroactively from Caught + RunOut wicket events.
+        // Skip if ANY player in this match already has a non-zero fielding stat (means it was saved with the new format).
+        const hasNewFormat=(m.playerStats||[]).some(ps=>(ps.catches||ps.runOuts||ps.runOutAssists||ps.runOutsAgainst));
+        if(!hasNewFormat&&m.matchData){
+          try{
+            const md=JSON.parse(m.matchData);
+            const innArr=md.inn||[];
+            innArr.forEach(inn=>{
+              if(!inn||!inn.balls)return;
+              (inn.balls).forEach(ball=>{
+                if(ball.type!=='wicket')return;
+                if(ball.how==='Caught'&&ball.catcher){
+                  const dn=resolveName(ball.catcher);
+                  if(!agg[dn])return; // catcher must already be in agg via their playerStats entry
+                  agg[dn].catches++;
+                }
+                if(ball.how==='RunOut'){
+                  if(ball.completer){
+                    const dn=resolveName(ball.completer);
+                    if(agg[dn])agg[dn].runOuts++;
+                  }
+                  if(ball.thrower&&ball.thrower!==ball.completer){
+                    const dn=resolveName(ball.thrower);
+                    if(agg[dn])agg[dn].runOutAssists++;
+                  }
+                  // Run-out against — credit the dismissed batsman (find via batsmanIdx + team).
+                  if(ball.batsmanIdx!=null&&inn.batsmen&&inn.batsmen[ball.batsmanIdx]){
+                    const dn=resolveName(inn.batsmen[ball.batsmanIdx].name);
+                    if(agg[dn])agg[dn].runOutsAgainst++;
+                  }
+                }
+              });
+            });
+          }catch(e){/* malformed matchData — skip silently */}
+        }
+      });
       lbData=Object.values(agg);
       _lbDataCache=lbData;
       _lbCacheKey=fp;
