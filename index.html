@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Garden Cricket</title>
+<!-- Preconnect: start DNS lookup + TLS handshake EARLY so Firebase queries are faster on cold loads -->
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* DARK MODE (default) */
@@ -74,6 +80,11 @@ body{background:var(--bg);color:var(--white);font-family:var(--font);min-height:
 .view-all{text-align:center;margin-top:14px;font-size:12px;color:var(--muted);letter-spacing:1px;cursor:pointer}
 .view-all:active{color:var(--accent)}
 .empty-state{text-align:center;padding:28px;color:var(--muted);font-size:14px}
+/* Skeleton placeholder cards while data is loading */
+.skeleton-card{pointer-events:none}
+.sk-line{height:11px;border-radius:5px;background:linear-gradient(90deg,var(--card2) 0%,var(--card) 50%,var(--card2) 100%);background-size:200% 100%;animation:skshimmer 1.2s linear infinite;margin:6px 0}
+.sk-line.w70{width:70%}.sk-line.w50{width:50%}.sk-line.w90{width:90%}
+@keyframes skshimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 .resume-card{width:100%;max-width:440px;background:var(--orangedim);border:1px solid var(--orange);border-radius:14px;padding:16px 18px;margin-bottom:20px;display:none}
 .resume-card.show{display:block}
 .resume-card-top{display:flex;align-items:center;gap:10px;margin-bottom:12px}
@@ -803,8 +814,8 @@ td.g{color:var(--green)}td.gl{color:var(--gold)}td.mu{color:var(--muted)}td.ac{c
     <div class="rpt-toss" id="rp-toss"></div>
     <div id="report-body"></div>
     <div class="rpt-btns">
-      <button class="rptbtn new" onclick="goTo('home')">🏠 Home</button>
-      <button class="rptbtn hist" onclick="goTo('history')">History</button>
+      <button class="rptbtn new" onclick="reportLeaveTo('home')">🏠 Home</button>
+      <button class="rptbtn hist" onclick="reportLeaveTo('history')">History</button>
     </div>
   </div>
 </div>
@@ -895,7 +906,7 @@ td.g{color:var(--green)}td.gl{color:var(--gold)}td.mu{color:var(--muted)}td.ac{c
         • Running between wickets — 1, 2, 3 runs<br>
         • Double-wicket players get a 2nd life<br>
         • Run Outs with assist tracking<br>
-        • Max 3 players per team
+        • Max 4 players per team
       </div>
       <label>Match date</label>
       <input type="text" id="to-date" placeholder="Match Date">
@@ -903,7 +914,7 @@ td.g{color:var(--green)}td.gl{color:var(--gold)}td.mu{color:var(--muted)}td.ac{c
     <div class="scard">
       <div class="scard-title blue">Team A</div>
       <label>Team name</label><input type="text" id="to-ta-name" placeholder="Team Name">
-      <div class="pc-section-lbl">Players · First tap = captain · Max 3</div>
+      <div class="pc-section-lbl">Players · First tap = captain · Max 4</div>
       <div class="pc-selected-row" id="pc-toa-selected">No players selected yet</div>
       <div class="pc-grid" id="pc-toa-grid"></div>
       <button class="pc-add" onclick="promptAddPlayer('toa')">+ Add new player</button>
@@ -911,7 +922,7 @@ td.g{color:var(--green)}td.gl{color:var(--gold)}td.mu{color:var(--muted)}td.ac{c
     <div class="scard">
       <div class="scard-title orange-c">Team B</div>
       <label>Team name</label><input type="text" id="to-tb-name" placeholder="Team Name">
-      <div class="pc-section-lbl">Players · First tap = captain · Max 3</div>
+      <div class="pc-section-lbl">Players · First tap = captain · Max 4</div>
       <div class="pc-selected-row" id="pc-tob-selected">No players selected yet</div>
       <div class="pc-grid" id="pc-tob-grid"></div>
       <button class="pc-add" onclick="promptAddPlayer('tob')">+ Add new player</button>
@@ -1043,7 +1054,9 @@ td.g{color:var(--green)}td.gl{color:var(--gold)}td.mu{color:var(--muted)}td.ac{c
 <div class="modal" id="mod-runout">
   <div class="modal-box">
     <div class="modal-title">Run Out</div>
-    <div class="pc-section-lbl" style="margin-top:0">Who threw it? (assist)</div>
+    <div class="pc-section-lbl" style="margin-top:0">Who got out?</div>
+    <div id="ro-target-grid" style="display:flex;flex-direction:column;gap:8px;margin-bottom:4px"></div>
+    <div class="pc-section-lbl" style="margin-top:8px">Who threw it? (assist)</div>
     <div class="pc-grid" id="ro-thrower-grid" style="max-height:140px"></div>
     <div class="pc-section-lbl" style="margin-top:8px">Who completed the run out?</div>
     <div class="pc-grid" id="ro-completer-grid" style="max-height:140px"></div>
@@ -1059,10 +1072,12 @@ td.g{color:var(--green)}td.gl{color:var(--gold)}td.mu{color:var(--muted)}td.ac{c
 <div class="modal" id="mod-dwchoice">
   <div class="modal-box">
     <div class="modal-title" id="dwc-title">Double Wicket — Choice</div>
-    <div id="dwc-msg" style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.5"></div>
+    <div id="dwc-msg" style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.5;white-space:pre-line"></div>
     <div style="display:flex;flex-direction:column;gap:8px">
       <button class="mbtn confirm" id="dwc-btn-continue" style="background:var(--gold);color:#050a18" onclick="dwChoice('continue')">Use 2nd Wicket (continue)</button>
       <button class="mbtn confirm" id="dwc-btn-swap" style="background:var(--accent);color:#050a18" onclick="dwChoice('swap')">Send in SW Player</button>
+      <button class="mbtn confirm" id="dwc-btn-swap2" style="background:var(--accent);color:#050a18;display:none" onclick="dwChoice('swap2')">Send in SW Player 2</button>
+      <button class="mbtn cancel" id="dwc-btn-cancel" style="margin-top:4px" onclick="dwChoiceCancel()">↩ Cancel &amp; Undo Wicket</button>
     </div>
   </div>
 </div>
@@ -1082,6 +1097,7 @@ td.g{color:var(--green)}td.gl{color:var(--gold)}td.mu{color:var(--muted)}td.ac{c
     <div class="overlay-title" id="batsman-sel-title" style="color:var(--accent)">SELECT BATSMAN</div>
     <div class="overlay-sub" id="batsman-sel-sub"></div>
     <div id="batsman-sel-list" style="display:flex;flex-direction:column;gap:9px;margin-top:4px"></div>
+    <button class="mbtn cancel" id="batsman-sel-cancel" style="margin-top:14px;display:none" onclick="batsmanSelCancel()">↩ Cancel &amp; Undo</button>
   </div>
 </div>
 
@@ -1468,7 +1484,7 @@ function openRenameModal(){
     // Ensure lbMatches is populated so getAllKnownNames has data even if user
     // opens rename modal before ever opening the leaderboard.
     if(!Array.isArray(lbMatches)||lbMatches.length===0){
-      try{if(window._dbReady)lbMatches=await window._db.getMatches();}catch(e){}
+      try{if(window._dbReady){const _m=await fetchMatchesAndCache();if(_m)lbMatches=_m;}}catch(e){}
     }
     renderRenameKnownNames();
     renderExistingRenames();
@@ -1919,9 +1935,9 @@ function pcToggle(key,name){
   const idx=sel.indexOf(name);
   if(idx>=0)sel.splice(idx,1);
   else {
-    // Tenover surfaces (toa, tob) are capped at 3 players per team.
-    if((key==='toa'||key==='tob')&&sel.length>=3){
-      appAlert('Max 3 players per team in 10-over mode. Deselect one before adding another.',{icon:'⚠️',title:'Team Full'});
+    // Tenover surfaces (toa, tob) are capped at 4 players per team.
+    if((key==='toa'||key==='tob')&&sel.length>=4){
+      appAlert('Max 4 players per team in 10-over mode. Deselect one before adding another.',{icon:'⚠️',title:'Team Full'});
       return;
     }
     sel.push(name);
@@ -1940,8 +1956,8 @@ function promptAddPlayer(key){
   if(!trimmed)return;
   if(trimmed.length>30){appAlert('Name too long (max 30 chars).',{icon:'⚠️',title:'Too Long'});return;}
   // Tenover team cap
-  if((key==='toa'||key==='tob')&&_pcSel[key].length>=3){
-    appAlert('Max 3 players per team in 10-over mode.',{icon:'⚠️',title:'Team Full'});
+  if((key==='toa'||key==='tob')&&_pcSel[key].length>=4){
+    appAlert('Max 4 players per team in 10-over mode.',{icon:'⚠️',title:'Team Full'});
     return;
   }
   // Check duplicates against the full known set (case-insensitive)
@@ -1967,7 +1983,7 @@ function pcReset(keys){(Array.isArray(keys)?keys:[keys]).forEach(k=>{_pcSel[k]=[
 async function pcInitScreen(keys,preselect){
   // Ensure latest matches are loaded so chooser has the full name pool
   if(window._dbReady&&(!Array.isArray(lbMatches)||lbMatches.length===0)){
-    try{lbMatches=await window._db.getMatches();}catch(e){}
+    try{{const _m=await fetchMatchesAndCache();if(_m)lbMatches=_m;}}catch(e){}
   }
   pcReset(keys);
   if(preselect){
@@ -2031,8 +2047,8 @@ function proceedToDWAssign(){
     appAlert(`Pick at least 1 player for each team.\n\n${tA}: ${pA.length}\n${tB}: ${pB.length}`,{icon:'👥',title:'Missing Players'});
     return;
   }
-  if(pA.length>3||pB.length>3){
-    appAlert(`Max 3 players per team in 10-over mode.\n\n${tA}: ${pA.length}\n${tB}: ${pB.length}`,{icon:'⚠️',title:'Too Many Players'});
+  if(pA.length>4||pB.length>4){
+    appAlert(`Max 4 players per team in 10-over mode.\n\n${tA}: ${pA.length}\n${tB}: ${pB.length}`,{icon:'⚠️',title:'Too Many Players'});
     return;
   }
   const overlap=pA.filter(n=>pB.includes(n));
@@ -2067,7 +2083,10 @@ function renderDWAssign(){
     grid.innerHTML='';
     if(team.players.length===2){
       instr.textContent='2-player team — both players automatically get double wickets';
+    } else if(team.players.length===1){
+      instr.textContent='1-player team — automatically gets double wickets';
     } else {
+      // 3 or 4 player team — captain picks exactly 2
       instr.textContent='Tap exactly 2 players to mark as double-wicket';
     }
     team.players.forEach((name,idx)=>{
@@ -2078,13 +2097,13 @@ function renderDWAssign(){
       const cap=idx===0?'<span class="pc-cap">★</span>':'';
       const tag=selected?'<span class="pc-idx">2W</span>':'<span class="pc-idx" style="background:rgba(255,200,0,.15)">1W</span>';
       chip.innerHTML=`${esc(name)} ${cap}${tag}`;
-      // Only allow taps for 3-player teams; 2-player is fixed
-      if(team.players.length>2){
+      // Chips are clickable only for 3+ player teams (2-player auto-assigns both, 1-player auto-assigns that one)
+      if(team.players.length>=3){
         chip.onclick=()=>{
           if(_dwSel[i].has(name)){_dwSel[i].delete(name);}
           else {
             if(_dwSel[i].size>=2){
-              // Already 2 selected — replace the oldest? Simpler: don't add, force user to deselect first.
+              // Already 2 selected — force user to deselect first.
               return;
             }
             _dwSel[i].add(name);
@@ -2096,7 +2115,8 @@ function renderDWAssign(){
     });
     if(team.players.length===2){
       status.innerHTML='<span style="color:var(--green)">✓ Both players have 2 wickets each</span>';
-    } else if(team.players.length===3){
+    } else if(team.players.length>=3){
+      // 3 or 4 player team — needs exactly 2 selected
       status.innerHTML=_dwSel[i].size===2?'<span style="color:var(--green)">✓ 2 double-wicket players selected</span>':`<span style="color:var(--orange)">Pick ${2-_dwSel[i].size} more double-wicket player${2-_dwSel[i].size===1?'':'s'}</span>`;
     } else {
       // 1-player team — degenerate edge case, just give them double wickets
@@ -2106,10 +2126,10 @@ function renderDWAssign(){
   });
 }
 function confirmDWAndStart(){
-  // Validate: for 3-player teams, exactly 2 selected; for 2-player, both selected; for 1-player, that one.
+  // Validate: for 3+ player teams, exactly 2 selected; for 2-player, both selected; for 1-player, that one.
   for(let i=0;i<2;i++){
     const team=G.teams[i];
-    if(team.players.length===3&&_dwSel[i].size!==2){
+    if(team.players.length>=3&&_dwSel[i].size!==2){
       appAlert(`${team.name}: pick exactly 2 double-wicket players (currently ${_dwSel[i].size}).`,{icon:'⚠️',title:'Pick 2'});
       return;
     }
@@ -2261,16 +2281,18 @@ function wicket(how){
 }
 
 function doWicket(how,catcher,extra){
-  // extra is an optional object: { thrower, completer } for RunOut.
+  // extra: { thrower, completer, targetIsNonStriker } — last two only for RunOut.
   const inn=ci();const bw=inn.currentBowlerIdx!==null?inn.bowlers[inn.currentBowlerIdx]:null;
-  // Defensive: if no batsman is at the crease (between balls / mid-selector), bail out silently.
-  // This can happen if the user rapid-taps a dismissal button after a previous wicket fully advanced.
-  if(inn.currentBatterPlayerIdx===null||inn.currentBatterPlayerIdx===undefined||inn.currentBatterPlayerIdx>=inn.batsmen.length){
-    syncMsg('No batsman at the crease','error');
+  // Determine which slot is being dismissed. ALWAYS striker except for non-striker RunOut.
+  const targetIsNonStriker=!!(extra&&extra.targetIsNonStriker);
+  const targetIdx=targetIsNonStriker?inn.nonStrikerPlayerIdx:inn.currentBatterPlayerIdx;
+  // Defensive: target slot must have a valid player.
+  if(targetIdx===null||targetIdx===undefined||targetIdx>=inn.batsmen.length){
+    syncMsg('No batsman in that slot','error');
     return;
   }
-  const bt=inn.batsmen[inn.currentBatterPlayerIdx];
-  if(!bt){syncMsg('No batsman at the crease','error');return;}
+  const bt=inn.batsmen[targetIdx];
+  if(!bt){syncMsg('No batsman in that slot','error');return;}
   snapshot();
   const isRetired=(how==='Retired');
   const isRunOut=(how==='RunOut');
@@ -2281,22 +2303,18 @@ function doWicket(how,catcher,extra){
   if(bt.wicketsLeft===0){
     bt.out=true;bt.howOut=how;bt.catcher=catcher||'';
     if(isRunOut&&extra){bt.runoutThrower=extra.thrower||'';bt.runoutCompleter=extra.completer||'';}
-  } else {
-    // First dismissal of a 2W player: mark a sub-status but DON'T set .out yet. Track on the batsman for the BBL/report.
-    bt.firstDismissalHow=how;
-    bt.firstDismissalCatcher=catcher||'';
-    if(isRunOut&&extra){bt.firstDismissalThrower=extra.thrower||'';bt.firstDismissalCompleter=extra.completer||'';}
   }
-  if(!isRetired)bt.balls++;
+  // (Note: removed unused firstDismissal* fields — they were write-only data bloat.)
+  // Non-striker is not facing the ball; don't increment their ball count for non-striker run outs.
+  // For striker dismissals (any type except Retired), tick their ball count.
+  if(!isRetired&&!targetIsNonStriker)bt.balls++;
   // Retired Out: between balls when ball is dead. No bowler credit, no legal ball, no over advancement, no FH reset.
   // RunOut: legal ball happened, but bowler does NOT get the wicket credit (cricket rule).
   if(!isRetired&&!isRunOut&&bw)bw.wickets++;
   inn.wickets++;
   // Free hit indicator on the ball: TRUE for run outs that happened on a free hit (the one legal dismissal).
-  // For Retired Out (between balls), free hit doesn't apply. For other wicket types, the fh nextFH check
-  // earlier in `wicket()` already blocked the tap.
   const fhOnThisBall=(isRunOut&&inn.nextFH);
-  const ball={type:'wicket',how,catcher:catcher||'',fh:fhOnThisBall,over:inn.currentOver,bowlerIdx:isRetired?null:inn.currentBowlerIdx,batsmanIdx:inn.currentBatterPlayerIdx,legal:!isRetired,id:nextBallId(),isFirstDismissalOfDW,doubleWicketContinued:false};
+  const ball={type:'wicket',how,catcher:catcher||'',fh:fhOnThisBall,over:inn.currentOver,bowlerIdx:isRetired?null:inn.currentBowlerIdx,batsmanIdx:targetIdx,legal:!isRetired,id:nextBallId(),isFirstDismissalOfDW,doubleWicketContinued:false,targetIsNonStriker};
   if(isRunOut&&extra){ball.thrower=extra.thrower||'';ball.completer=extra.completer||'';}
   inn.balls.push(ball);
   if(!isRetired){
@@ -2306,28 +2324,44 @@ function doWicket(how,catcher,extra){
     if(G.matchMode==='tenover'&&inn.legalInOver===0)swapStrike(inn);
   }
   haptic(HAPTIC.wicket);
-  // Branch: first dismissal of a 2W player → ask captain choice (and DON'T advance batsman index).
+  // Branch: first dismissal of a 2W player → ask captain choice (and DON'T advance slot).
   if(isFirstDismissalOfDW){
     if(checkEnd())return;render();autoSave();
-    showDoubleWicketChoice(ball,bt);
+    showDoubleWicketChoice(ball,bt,targetIsNonStriker);
     return;
   }
-  // Normal flow: advance to next batsman.
-  // Tenover mode: if there's a 2W player waiting to return (waitingDWReturn), they auto-take strike.
-  if(G.matchMode==='tenover'&&inn.waitingDWReturn!==null&&inn.waitingDWReturn!==undefined){
-    const returningIdx=inn.waitingDWReturn;
-    inn.waitingDWReturn=null;
-    inn.currentBatterPlayerIdx=returningIdx;
-    // returningIdx already in battingSequence from previous innings activity; nonStriker unchanged.
-    haptic(HAPTIC.wicket);
+  // Full out: vacate WHICHEVER slot the dismissed player is currently in.
+  // (Over-end strike swap may have moved them after the wicket was recorded — find them dynamically.)
+  if(bt.wicketsLeft===0){
+    const dismissedIdx=targetIdx;
+    const inStriker=inn.currentBatterPlayerIdx===dismissedIdx;
+    const inNonStriker=inn.nonStrikerPlayerIdx===dismissedIdx;
+    if(inStriker){
+      inn.currentBatsmanIdx++;
+      inn.currentBatterPlayerIdx=null;
+    } else if(inNonStriker){
+      inn.nonStrikerPlayerIdx=null;
+    }
+    // Tenover: auto-return waiting 2W player into the vacant slot.
+    if(G.matchMode==='tenover'&&inn.waitingDWReturn!==null&&inn.waitingDWReturn!==undefined){
+      const returningIdx=inn.waitingDWReturn;
+      inn.waitingDWReturn=null;
+      if(inStriker){
+        inn.currentBatterPlayerIdx=returningIdx;
+      } else if(inNonStriker){
+        inn.nonStrikerPlayerIdx=returningIdx;
+      }
+      haptic(HAPTIC.wicket);
+      if(checkEnd())return;render();autoSave();
+      return;
+    }
     if(checkEnd())return;render();autoSave();
+    // Show picker for the vacant slot.
+    showBatsmanSelector();
     return;
   }
-  // Otherwise: standard new-batsman selector
-  inn.currentBatsmanIdx++;inn.currentBatterPlayerIdx=null;
-  // Tenover: if striker out, the non-striker is still at the crease — bring next batsman in as the new striker.
-  // (currentBatterPlayerIdx is the striker; non-striker stays in nonStrikerPlayerIdx — selector picks new striker.)
-  if(checkEnd())return;render();autoSave();showBatsmanSelector();
+  // Otherwise (DW continuation handled above) — should not reach here.
+  if(checkEnd())return;render();autoSave();
 }
 
 function advOv(inn,bw){
@@ -2347,17 +2381,24 @@ function showBatsmanSelector(){
   const inn=ci();if(!inn)return;
   const notYetBatted=inn.batsmen.map((bt,i)=>({bt,i})).filter(({i})=>!inn.battingSequence.includes(i)&&!inn.batsmen[i].out);
   const isOpener=inn.battingSequence.length===0;
-  // Tenover mode + opener: this picks the STRIKER. After they pick, we'll chain to non-striker selector.
-  // Tenover mode + non-striker pending: this picks the NON-STRIKER (after striker is set).
+  // Tenover modes:
+  // - Opener: pick striker. Chain to non-striker.
+  // - Mid-innings: vacant slot is whichever one is null.
   const tenoverPickingNonStriker=G.matchMode==='tenover'&&inn.battingSequence.length===1&&inn.nonStrikerPlayerIdx===null&&notYetBatted.length>0;
+  // Mid-innings non-striker fill (after a non-striker dismissal):
+  const tenoverFillingNonStrikerSlot=G.matchMode==='tenover'&&!isOpener&&inn.currentBatterPlayerIdx!==null&&(inn.nonStrikerPlayerIdx===null||inn.nonStrikerPlayerIdx===undefined);
   const modal=document.getElementById('mod-batsman');
   let title=isOpener?'OPENING STRIKER':'NEXT BATSMAN';
   if(tenoverPickingNonStriker)title='OPENING NON-STRIKER';
+  else if(tenoverFillingNonStrikerSlot)title='NEW NON-STRIKER';
   document.getElementById('batsman-sel-title').textContent=title;
   const sub=document.getElementById('batsman-sel-sub');
   if(tenoverPickingNonStriker){
     const strikerName=resolveName(inn.batsmen[inn.currentBatterPlayerIdx].name);
     sub.textContent=`🏏 ${strikerName} is striking — choose the partner`;
+  } else if(tenoverFillingNonStrikerSlot){
+    const strikerName=resolveName(inn.batsmen[inn.currentBatterPlayerIdx].name);
+    sub.textContent=`🏏 ${strikerName} is on strike — pick the new non-striker`;
   } else if(!isOpener){const crease=inn.battingSequence.filter(idx=>!inn.batsmen[idx].out);sub.textContent=crease.length>0?`🏏 ${resolveName(inn.batsmen[crease[crease.length-1]].name)} is at the crease`:'';
   } else {sub.textContent='Choose who opens the batting';}
   const list=document.getElementById('batsman-sel-list');list.innerHTML='';
@@ -2373,12 +2414,31 @@ function showBatsmanSelector(){
     list.appendChild(btn);
   });
   if(notYetBatted.length===0){modal.classList.remove('show');return;}
+  // Cancel button visibility: only show if there's something to roll back (undo stack non-empty).
+  // For the very first opening pick at innings start, undo stack is empty — Cancel would have nothing to do.
+  const cancelBtn=document.getElementById('batsman-sel-cancel');
+  if(cancelBtn){
+    if(G.undoStack&&G.undoStack.length>0){
+      cancelBtn.style.display='block';
+      // Update label based on whether we're mid-chain (non-striker pick) or after a wicket.
+      cancelBtn.textContent=tenoverPickingNonStriker?'↩ Cancel &amp; Re-pick Striker':'↩ Cancel &amp; Undo Wicket';
+      cancelBtn.innerHTML=tenoverPickingNonStriker?'↩ Cancel &amp; Re-pick Striker':'↩ Cancel &amp; Undo Wicket';
+    } else {
+      cancelBtn.style.display='none';
+    }
+  }
   modal.classList.add('show');
+}
+// Called when the user taps the Cancel button on the batsman selector.
+// Closes the modal and rolls back the prior state (the wicket or the opener pick).
+function batsmanSelCancel(){
+  document.getElementById('mod-batsman').classList.remove('show');
+  undoLast();
 }
 function selectBatsman(playerIdx){
   const inn=ci();if(!inn)return;
   snapshot();
-  // Tenover non-striker selection (chained from opener pick)
+  // Tenover OPENING non-striker selection (chained from opener pick)
   if(G.matchMode==='tenover'&&inn.battingSequence.length===1&&inn.nonStrikerPlayerIdx===null){
     inn.nonStrikerPlayerIdx=playerIdx;
     inn.battingSequence.push(playerIdx);
@@ -2386,6 +2446,15 @@ function selectBatsman(playerIdx){
     render();autoSave();
     return;
   }
+  // Tenover MID-INNINGS non-striker fill (after a non-striker dismissal, striker is set, non-striker null)
+  if(G.matchMode==='tenover'&&inn.battingSequence.length>1&&inn.currentBatterPlayerIdx!==null&&(inn.nonStrikerPlayerIdx===null||inn.nonStrikerPlayerIdx===undefined)){
+    inn.nonStrikerPlayerIdx=playerIdx;
+    inn.battingSequence.push(playerIdx);
+    document.getElementById('mod-batsman').classList.remove('show');
+    render();autoSave();
+    return;
+  }
+  // Otherwise: fill the striker slot
   inn.currentBatterPlayerIdx=playerIdx;
   inn.battingSequence.push(playerIdx);
   document.getElementById('mod-batsman').classList.remove('show');
@@ -2467,6 +2536,8 @@ function undoLast(){
   if(cur&&cur.currentBatterPlayerIdx===null&&cur.currentBatsmanIdx<cur.batsmen.length&&!G.inningsBreak){
     setTimeout(()=>showBatsmanSelector(),200);
   }
+  // If after restore we're back at a pending DW choice state (granular undo of dwChoice rolls back here), re-open the modal.
+  recheckPendingDWModal();
   // If after restore we're back at the innings break overlay, redisplay it.
   if(G.inningsBreak&&G.innings===0&&G.inn[0]){
     const inn=G.inn[0];
@@ -2475,6 +2546,24 @@ function undoLast(){
     document.getElementById('ov-inn-sub').textContent=`${G.teams[inn.bowl].name} need ${inn.runs+1} runs in ${G.totalOvers} overs to win`;
     document.getElementById('ov-inn').classList.add('show');
   }
+}
+
+// Detect if the current state is "wicket just happened, captain hasn't chosen yet" (tenover 2W first dismissal).
+// Re-open the DW choice modal so the user can complete the choice.
+function recheckPendingDWModal(){
+  if(G.matchMode!=='tenover')return;
+  const inn=ci();if(!inn||!inn.balls||inn.balls.length===0)return;
+  const last=inn.balls[inn.balls.length-1];
+  if(!last||last.type!=='wicket'||!last.isFirstDismissalOfDW||last.doubleWicketContinued)return;
+  // The dismissed batsman's slot should still hold them (wicketsLeft=1, not advanced).
+  const dismissed=inn.batsmen[last.batsmanIdx];
+  if(!dismissed||(dismissed.wicketsLeft||0)!==1)return;
+  // Verify the dismissed player is still in the slot they were in (state wasn't pushed forward).
+  const stillInStrikerSlot=inn.currentBatterPlayerIdx===last.batsmanIdx;
+  const stillInNonStrikerSlot=inn.nonStrikerPlayerIdx===last.batsmanIdx;
+  if(!stillInStrikerSlot&&!stillInNonStrikerSlot)return;
+  // Re-show modal.
+  setTimeout(()=>showDoubleWicketChoice(last,dismissed,!!last.targetIsNonStriker),300);
 }
 
 function replayBall(b){
@@ -2580,14 +2669,39 @@ function closeCaughtModal(){document.getElementById('mod-caught').classList.remo
 // ═══ RUN OUT MODAL (tenover only) ═══
 let _roSelectedThrower=null;
 let _roSelectedCompleter=null;
+// 'striker' or 'nonstriker' — which batter at the crease is being dismissed. Defaults to striker.
+let _roSelectedTarget='striker';
 function openRunOutModal(){
   const inn=ci();if(!inn)return;
-  _roSelectedThrower=null;_roSelectedCompleter=null;
+  _roSelectedThrower=null;_roSelectedCompleter=null;_roSelectedTarget='striker';
   const bowlingTeam=G.teams[inn.bowl];
+  // Render target picker (striker / non-striker)
+  renderRunOutTargetPicker();
   // Pre-render both grids
   renderRunOutGrid('ro-thrower-grid',bowlingTeam.players,(name)=>{_roSelectedThrower=name;renderRunOutGrids();});
   renderRunOutGrid('ro-completer-grid',bowlingTeam.players,(name)=>{_roSelectedCompleter=name;renderRunOutGrids();});
   document.getElementById('mod-runout').classList.add('show');
+}
+function renderRunOutTargetPicker(){
+  const inn=ci();if(!inn)return;
+  const grid=document.getElementById('ro-target-grid');grid.innerHTML='';
+  // Always show striker
+  const strikerIdx=inn.currentBatterPlayerIdx;
+  const nonStrikerIdx=inn.nonStrikerPlayerIdx;
+  const mkBtn=(label,name,key,active)=>{
+    const btn=document.createElement('button');
+    btn.className='mbtn'+(active?' confirm':' cancel');
+    btn.style.cssText=active?'background:var(--accent);color:#050a18;font-weight:700':'';
+    btn.textContent=`${label}: ${resolveName(name)}`;
+    btn.onclick=()=>{_roSelectedTarget=key;renderRunOutTargetPicker();};
+    return btn;
+  };
+  if(strikerIdx!==null&&strikerIdx!==undefined&&inn.batsmen[strikerIdx]){
+    grid.appendChild(mkBtn('Striker',inn.batsmen[strikerIdx].name,'striker',_roSelectedTarget==='striker'));
+  }
+  if(nonStrikerIdx!==null&&nonStrikerIdx!==undefined&&inn.batsmen[nonStrikerIdx]){
+    grid.appendChild(mkBtn('Non-striker',inn.batsmen[nonStrikerIdx].name,'nonstriker',_roSelectedTarget==='nonstriker'));
+  }
 }
 function renderRunOutGrids(){
   const inn=ci();if(!inn)return;
@@ -2609,100 +2723,140 @@ function renderRunOutGrid(gridId,names,onPick){
     grid.appendChild(chip);
   });
 }
-function closeRunOutModal(){document.getElementById('mod-runout').classList.remove('show');_roSelectedThrower=null;_roSelectedCompleter=null;}
+function closeRunOutModal(){document.getElementById('mod-runout').classList.remove('show');_roSelectedThrower=null;_roSelectedCompleter=null;_roSelectedTarget='striker';}
 function confirmRunOut(){
   if(!_roSelectedThrower||!_roSelectedCompleter){
     appAlert('Pick both the thrower and the completer (they can be the same player for a direct hit).',{icon:'🏃',title:'Pick Both'});
     return;
   }
-  const thrower=_roSelectedThrower,completer=_roSelectedCompleter;
+  const thrower=_roSelectedThrower,completer=_roSelectedCompleter,targetIsNonStriker=(_roSelectedTarget==='nonstriker');
   closeRunOutModal();
-  doWicket('RunOut','',{thrower,completer});
+  doWicket('RunOut','',{thrower,completer,targetIsNonStriker});
 }
 
 // ═══ DOUBLE-WICKET CHOICE (tenover only) ═══
 // Shown after first dismissal of a 2W player. Lets captain decide whether dismissed player
 // uses 2nd wicket immediately, or single-wicket teammate comes in.
 let _dwcContext=null;
-function showDoubleWicketChoice(wicketBall,dismissedBatsman){
+// Helper: find which slot the dismissed player is CURRENTLY in.
+// Strike rotation (over-end swap on a 6th-ball wicket) may have moved them after the wicket was recorded.
+// Returns {dismissedSlot:'striker'|'nonstriker', partnerSlotIdx: the player at the other slot}.
+function dwLocateDismissed(inn,dismissedIdx){
+  if(inn.currentBatterPlayerIdx===dismissedIdx){
+    return {dismissedSlot:'striker',partnerSlotIdx:inn.nonStrikerPlayerIdx};
+  }
+  if(inn.nonStrikerPlayerIdx===dismissedIdx){
+    return {dismissedSlot:'nonstriker',partnerSlotIdx:inn.currentBatterPlayerIdx};
+  }
+  return {dismissedSlot:null,partnerSlotIdx:null};
+}
+function showDoubleWicketChoice(wicketBall,dismissedBatsman,targetIsNonStrikerWasOriginal){
+  // (targetIsNonStrikerWasOriginal: what the USER picked at dismissal time — kept for label clarity ("non-striker dismissed").
+  //  Slot tracking, however, derives from CURRENT state below to avoid over-end-swap confusion.)
   const inn=ci();if(!inn){return;}
-  const teamPlayers=G.teams[inn.bat].players;
-  // Find the single-wicket player (initialWickets===1) who has wicketsLeft>0 AND has not been dismissed.
-  // Also they shouldn't already be at the crease (as non-striker).
+  const loc=dwLocateDismissed(inn,wicketBall.batsmanIdx);
+  if(!loc.dismissedSlot){
+    // Dismissed player isn't on the field anymore (shouldn't happen — bail safely).
+    return;
+  }
+  // SW candidates: 1W players not at the partner slot (i.e. on the bench).
   const swCandidates=inn.batsmen.map((b,idx)=>({b,idx})).filter(({b,idx})=>{
     if((b.initialWickets||1)!==1)return false;
     if(b.wicketsLeft<=0)return false;
-    if(idx===inn.nonStrikerPlayerIdx)return false; // already at crease
+    if(idx===loc.partnerSlotIdx)return false;
     return true;
   });
-  // Edge case: 2-player team → no other player. Auto-continue with no modal.
-  // Also: 3-player team where SW player has been dismissed → auto-continue.
-  const swAlreadyAtCrease=inn.nonStrikerPlayerIdx!==null&&inn.nonStrikerPlayerIdx!==undefined&&(inn.batsmen[inn.nonStrikerPlayerIdx].initialWickets||1)===1;
+  const swAlreadyAtCrease=loc.partnerSlotIdx!==null&&loc.partnerSlotIdx!==undefined&&(inn.batsmen[loc.partnerSlotIdx].initialWickets||1)===1;
   if(swCandidates.length===0&&!swAlreadyAtCrease){
-    // Auto-continue: dismissed player uses 2nd wicket immediately.
     autoContinueDW(wicketBall);
     return;
   }
-  _dwcContext={wicketBall,dismissedIdx:inn.currentBatterPlayerIdx,swPlayerIdx:swCandidates.length>0?swCandidates[0].idx:null,swAlreadyAtCrease};
+  _dwcContext={
+    wicketBall,
+    dismissedIdx:wicketBall.batsmanIdx,
+    swPlayerIdx:swCandidates.length>0?swCandidates[0].idx:null,
+    swPlayerIdx2:swCandidates.length>1?swCandidates[1].idx:null,
+    swAlreadyAtCrease
+  };
   document.getElementById('dwc-title').textContent=`${resolveName(dismissedBatsman.name)} — Captain's Choice`;
-  let msg=`${resolveName(dismissedBatsman.name)} has been dismissed but has a second wicket left.`;
-  let swapBtn=document.getElementById('dwc-btn-swap');
+  // Label uses ORIGINAL dismissal context (what the user picked) for narrative clarity.
+  const slotLabel=targetIsNonStrikerWasOriginal?'non-striker':'striker';
+  let msg=`${resolveName(dismissedBatsman.name)} (dismissed as ${slotLabel}) has been dismissed but has a second wicket left.`;
+  const swapBtn=document.getElementById('dwc-btn-swap');
+  const swapBtn2=document.getElementById('dwc-btn-swap2');
+  swapBtn2.style.display='none';
   if(swAlreadyAtCrease){
-    const swName=resolveName(inn.batsmen[inn.nonStrikerPlayerIdx].name);
-    msg+=`\n\n${swName} (single-wicket) is already at the non-striker end. Choose: continue with ${resolveName(dismissedBatsman.name)} on 2nd wicket, OR give strike to ${swName}.`;
-    swapBtn.textContent=`Give strike to ${resolveName(inn.batsmen[inn.nonStrikerPlayerIdx].name)}`;
-  } else if(swCandidates.length>0){
+    const swName=resolveName(inn.batsmen[loc.partnerSlotIdx].name);
+    msg+=`\n\n${swName} (single-wicket) is already at the crease. Choose: continue with ${resolveName(dismissedBatsman.name)} on 2nd wicket, OR move ${swName} to ${loc.dismissedSlot==='striker'?'strike':'non-strike'}.`;
+    swapBtn.textContent=loc.dismissedSlot==='striker'?`Give strike to ${swName}`:`Put ${swName} at non-striker`;
+    swapBtn.style.display='block';
+  } else if(swCandidates.length>=2){
+    const n1=resolveName(swCandidates[0].b.name);
+    const n2=resolveName(swCandidates[1].b.name);
+    msg+=`\n\nSend in ${n1} or ${n2} to bat, OR have ${resolveName(dismissedBatsman.name)} continue on their 2nd wicket.`;
+    swapBtn.textContent=`Send in ${n1}`;
+    swapBtn.style.display='block';
+    swapBtn2.textContent=`Send in ${n2}`;
+    swapBtn2.style.display='block';
+  } else if(swCandidates.length===1){
     const swName=resolveName(swCandidates[0].b.name);
-    msg+=`\n\nSend in ${swName} (single-wicket) to bat instead, OR have ${resolveName(dismissedBatsman.name)} continue on their 2nd wicket.`;
+    msg+=`\n\nSend in ${swName} (single-wicket) to bat, OR have ${resolveName(dismissedBatsman.name)} continue on their 2nd wicket.`;
     swapBtn.textContent=`Send in ${swName}`;
+    swapBtn.style.display='block';
   }
   document.getElementById('dwc-msg').textContent=msg;
   document.getElementById('mod-dwchoice').classList.add('show');
 }
 function autoContinueDW(wicketBall){
   const inn=ci();if(!inn)return;
-  // Mark the wicket ball as "double wicket continued" (the dismissed player keeps batting)
   if(wicketBall)wicketBall.doubleWicketContinued=true;
-  // currentBatterPlayerIdx stays the same — they continue
   render();autoSave();
 }
 function dwChoice(choice){
+  // GRANULAR UNDO: snapshot BEFORE applying the captain's choice. Undoing this alone re-opens the modal.
+  snapshot();
   document.getElementById('mod-dwchoice').classList.remove('show');
-  const inn=ci();if(!inn||!_dwcContext)return;
+  const inn=ci();if(!inn||!_dwcContext){G.undoStack.pop();return;}
   const ctx=_dwcContext;_dwcContext=null;
   if(choice==='continue'){
-    // Dismissed batsman continues at the crease using their 2nd wicket. No change to currentBatterPlayerIdx.
     if(ctx.wicketBall)ctx.wicketBall.doubleWicketContinued=true;
     render();autoSave();
     return;
   }
-  // 'swap': send in SW player (or give strike to existing non-striker SW player)
+  // For swap/swap2 — derive the CURRENT slot positions (over-end swap may have moved things since the wicket).
+  const loc=dwLocateDismissed(inn,ctx.dismissedIdx);
+  if(!loc.dismissedSlot){G.undoStack.pop();return;} // shouldn't happen
+  const targetSwIdx=(choice==='swap2'&&ctx.swPlayerIdx2!==null&&ctx.swPlayerIdx2!==undefined)?ctx.swPlayerIdx2:ctx.swPlayerIdx;
+  const setSlot=(slotName,idx)=>{if(slotName==='striker')inn.currentBatterPlayerIdx=idx;else inn.nonStrikerPlayerIdx=idx;};
+  const otherSlot=loc.dismissedSlot==='striker'?'nonstriker':'striker';
   if(ctx.swAlreadyAtCrease){
-    // SW player is non-striker. They become striker. Dismissed 2W player goes to waiting bench.
-    // The non-striker slot needs a new player — pick the remaining 2W teammate (if any unbatted left).
-    const swPlayerIdx=inn.nonStrikerPlayerIdx;
+    // SW (partner) moves INTO the dismissed slot. Partner slot needs a fresh batsman.
+    const swIdx=loc.partnerSlotIdx;
     const dismissedIdx=ctx.dismissedIdx;
-    inn.currentBatterPlayerIdx=swPlayerIdx;
-    // Find a remaining batsman to take the non-striker slot (not the dismissed player, not the SW)
-    const newNonStriker=inn.batsmen.findIndex((b,idx)=>idx!==dismissedIdx&&idx!==swPlayerIdx&&(b.wicketsLeft||0)>0&&!inn.battingSequence.includes(idx));
-    if(newNonStriker>=0){
-      inn.nonStrikerPlayerIdx=newNonStriker;
-      if(!inn.battingSequence.includes(newNonStriker))inn.battingSequence.push(newNonStriker);
+    setSlot(loc.dismissedSlot,swIdx);
+    setSlot(otherSlot,null); // vacant until filled
+    const fresh=inn.batsmen.findIndex((b,idx)=>idx!==dismissedIdx&&idx!==swIdx&&(b.wicketsLeft||0)>0&&!inn.battingSequence.includes(idx));
+    if(fresh>=0){
+      if(!inn.battingSequence.includes(fresh))inn.battingSequence.push(fresh);
+      setSlot(otherSlot,fresh);
+      inn.waitingDWReturn=dismissedIdx;
     } else {
-      // No fresh batsman available to fill non-striker — dismissed player goes to non-striker slot as their "remaining wicket" return position
-      inn.nonStrikerPlayerIdx=dismissedIdx;
+      // No fresh — dismissed (1 wicket left) fills the other slot.
+      setSlot(otherSlot,dismissedIdx);
+      inn.waitingDWReturn=null;
     }
-    // Park dismissed player in waitingDWReturn IF nonStriker slot got someone else
-    if(newNonStriker>=0)inn.waitingDWReturn=dismissedIdx;
-    else inn.waitingDWReturn=null;
-  } else if(ctx.swPlayerIdx!==null){
-    // New SW player comes in as striker; dismissed 2W player goes to waitingDWReturn (bench).
-    // Non-striker stays unchanged.
-    if(!inn.battingSequence.includes(ctx.swPlayerIdx))inn.battingSequence.push(ctx.swPlayerIdx);
-    inn.currentBatterPlayerIdx=ctx.swPlayerIdx;
+  } else if(targetSwIdx!==null&&targetSwIdx!==undefined){
+    // Bench SW player fills the dismissed slot. Dismissed player parks.
+    if(!inn.battingSequence.includes(targetSwIdx))inn.battingSequence.push(targetSwIdx);
+    setSlot(loc.dismissedSlot,targetSwIdx);
     inn.waitingDWReturn=ctx.dismissedIdx;
   }
   render();autoSave();
+}
+function dwChoiceCancel(){
+  document.getElementById('mod-dwchoice').classList.remove('show');
+  _dwcContext=null;
+  undoLast();
 }
 
 // ═══ RENDER ═══
@@ -2711,7 +2865,7 @@ function bLabel(b){if(b.type==='wicket')return'W';if(b.type==='wide')return'Wd';
 function bDesc(b){
   if(b.type==='wicket'){
     let s=`OUT — ${b.how}`;
-    if(b.how==='Caught'&&b.catcher)s+=` (c: ${resolveName(b.catcher)})`;
+    if(b.how==='Caught'&&b.catcher&&b.catcher!=='Unknown')s+=` (c: ${resolveName(b.catcher)})`;
     if(b.how==='RunOut'){
       const t=b.thrower?resolveName(b.thrower):'';
       const c=b.completer?resolveName(b.completer):'';
@@ -2936,7 +3090,10 @@ function showReport(){
           if(bb.type==='wicket'&&bb.batsmanIdx===si&&bb.doubleWicketContinued!==true){wb=bb;break;}
         }
         const bn=wb&&wb.bowlerIdx!==null&&wb.bowlerIdx!==undefined?inn.bowlers[wb.bowlerIdx].name:'?';
-        if(bt.howOut==='Caught')howOut=`c ${bt.catcher||'?'} b ${bn}`;
+        if(bt.howOut==='Caught'){
+          const cn=bt.catcher&&bt.catcher!=='Unknown'?resolveName(bt.catcher):'';
+          howOut=cn?`c ${cn} b ${bn}`:`ct b ${bn}`;
+        }
         else if(bt.howOut==='Bowled')howOut=`b ${bn}`;
         else if(bt.howOut==='RunOut'){
           const t=wb&&wb.thrower?resolveName(wb.thrower):'';
@@ -3131,6 +3288,37 @@ function buildMatchStats(i1,i2){return{totalRuns:(i1.runs+(i2?i2.runs:0)),totalW
 // If Firebase fails or the tab dies before push, localStorage still has the latest state.
 // On next app open, we compare local vs Firebase and push local up if it's newer.
 const LOCAL_ACTIVE_KEY='gc-active-match-local';
+// Cache of the matches list — used for instant render on app open while Firebase loads in background.
+const LOCAL_LB_KEY='gc-lb-matches-cache';
+const LOCAL_LB_MAX_AGE_MS=7*24*60*60*1000; // 7 days; older cache gets discarded
+function saveLbCache(matches){
+  try{
+    const payload={ts:Date.now(),matches:matches||[]};
+    localStorage.setItem(LOCAL_LB_KEY,JSON.stringify(payload));
+  }catch(e){/* quota or disabled — silently skip */}
+}
+function loadLbCache(){
+  try{
+    const raw=localStorage.getItem(LOCAL_LB_KEY);
+    if(!raw)return null;
+    const p=JSON.parse(raw);
+    if(!p||!p.matches||!Array.isArray(p.matches))return null;
+    if(Date.now()-(p.ts||0)>LOCAL_LB_MAX_AGE_MS)return null;
+    return p.matches;
+  }catch(e){return null;}
+}
+// Centralized fetch: pulls matches from Firebase + updates the localStorage cache so subsequent app opens are fast.
+async function fetchMatchesAndCache(){
+  if(!window._dbReady)return null;
+  try{
+    const matches=await window._db.getMatches();
+    if(Array.isArray(matches)){
+      saveLbCache(matches);
+      return matches;
+    }
+  }catch(e){/* network/Firebase failure — caller handles fallback */}
+  return null;
+}
 let autoSaveTimer=null;
 let _lastFbSaveOk=true;
 function buildActiveMatchPayload(){
@@ -3617,17 +3805,9 @@ async function resumeMatch(){
       const remaining=inn.batsmen.filter((b,i)=>!inn.battingSequence.includes(i)&&(b.wicketsLeft||0)>0);
       if(remaining.length>0)setTimeout(()=>showBatsmanSelector(),500);
     }
-    // BUG RECOVERY: page may have reloaded mid-modal during a Double-Wicket choice.
-    // Detect by: last ball is a 2W first-dismissal that wasn't continued AND the dismissed batsman is still at strike.
-    if(G.matchMode==='tenover'&&inn&&inn.balls.length>0){
-      const last=inn.balls[inn.balls.length-1];
-      if(last&&last.type==='wicket'&&last.isFirstDismissalOfDW&&!last.doubleWicketContinued&&inn.currentBatterPlayerIdx===last.batsmanIdx){
-        const dismissed=inn.batsmen[last.batsmanIdx];
-        if(dismissed&&(dismissed.wicketsLeft||0)===1){
-          setTimeout(()=>showDoubleWicketChoice(last,dismissed),500);
-        }
-      }
-    }
+    // RECOVERY: page may have reloaded mid-modal during a Double-Wicket choice.
+    // Use the shared detector — handles both striker and non-striker dismissal cases.
+    recheckPendingDWModal();
   }catch(e){appAlert('Could not resume match.',{icon:'⚠️',title:'Resume Failed'});}
 }
 function confirmDiscard(){
@@ -3940,8 +4120,34 @@ async function confirmRetroSeries(){
 
 // ═══ HOME ═══
 async function loadHomeRecent(){
-  const el=document.getElementById('home-recent');if(!window._dbReady){el.innerHTML='<div class="empty-state">Connecting...</div>';return;}
-  try{const matches=await window._db.getMatches();if(matches.length===0){el.innerHTML='<div class="empty-state">No matches yet. Start your first one!</div>';return;}el.innerHTML=matches.slice(0,3).map(m=>`<div class="recent-card" onclick="viewMatchById('${m.id}')"><div class="recent-teams">${esc(m.teams[0])} vs ${esc(m.teams[1])}</div><div class="recent-meta"><div class="recent-scores">${esc(m.scores[0])} · ${esc(m.scores[1])}</div><div class="recent-winner">🏆 ${esc(m.winner)}</div></div><div class="recent-date">${esc(m.date)}</div></div>`).join('');}catch(e){el.innerHTML='<div class="empty-state">Could not load matches</div>';}
+  const el=document.getElementById('home-recent');
+  // Use cached lbMatches for instant render. Firebase fetch in background will refresh.
+  const render=(matches)=>{
+    if(!matches||matches.length===0){el.innerHTML='<div class="empty-state">No matches yet. Start your first one!</div>';return;}
+    el.innerHTML=matches.slice(0,3).map(m=>`<div class="recent-card" onclick="viewMatchById('${m.id}')"><div class="recent-teams">${esc(m.teams[0])} vs ${esc(m.teams[1])}</div><div class="recent-meta"><div class="recent-scores">${esc(m.scores[0])} · ${esc(m.scores[1])}</div><div class="recent-winner">🏆 ${esc(m.winner)}</div></div><div class="recent-date">${esc(m.date)}</div></div>`).join('');
+  };
+  // Step 1: instant render from cached lbMatches (set on init from localStorage)
+  if(Array.isArray(lbMatches)&&lbMatches.length>0){
+    render(lbMatches);
+  } else if(!window._dbReady){
+    // No cache AND db not ready — show skeleton placeholders
+    el.innerHTML=`<div class="recent-card skeleton-card"><div class="sk-line w70"></div><div class="sk-line w50"></div></div><div class="recent-card skeleton-card"><div class="sk-line w70"></div><div class="sk-line w50"></div></div>`;
+    return;
+  } else {
+    el.innerHTML='<div class="empty-state">Loading...</div>';
+  }
+  // Step 2: background refresh from Firebase (always — picks up new matches from other devices)
+  if(window._dbReady){
+    try{
+      const fresh=await window._db.getMatches();
+      if(Array.isArray(fresh)){
+        lbMatches=fresh;
+        saveLbCache(fresh);
+        invalidateLeaderboardCaches();
+        render(fresh);
+      }
+    }catch(e){/* show cached version, no error spam */}
+  }
 }
 
 // ═══ HISTORY ═══
@@ -4039,6 +4245,19 @@ function restoreLiveState(){
   _currentReportPartialNote='';
 }
 
+// Called when user taps Home or History from the report screen.
+// Critical: if this report was from VIEWING a historical match (not the live one's finished report),
+// we MUST restoreLiveState() first — otherwise G._viewing stays true and silently breaks autoSave for the next live match.
+function reportLeaveTo(target){
+  if(_liveStateBackup){
+    restoreLiveState();
+  } else {
+    // No backup means this was the live match's own finished report — just clear _viewing flag defensively.
+    G._viewing=false;
+  }
+  goTo(target);
+}
+
 // ═══ DELETE (password-gated) ═══
 function confirmDeleteMatch(id,label){
   requirePw(()=>{
@@ -4117,27 +4336,58 @@ function lbFingerprint(matches){
 function invalidateLeaderboardCaches(){_lbCacheKey=null;_lbDataCache=null;_h2hCache={};}
 
 async function loadLeaderboard(){
-  document.getElementById('lb-meta').textContent='Loading...';if(!window._dbReady){document.getElementById('lb-meta').textContent='Not connected';return;}
-  try{
-    lbMatches=await window._db.getMatches();
+  // CACHED PATH: if lbMatches is already populated (from localStorage cache or prior fetch), render immediately.
+  // Then refresh from Firebase in background.
+  const doRender=()=>{
     const fp=lbFingerprint(lbMatches);
     if(fp===_lbCacheKey&&_lbDataCache){
       lbData=_lbDataCache;
     } else {
-      const agg={};
-      lbMatches.forEach(m=>{if(!m.playerStats)return;m.playerStats.forEach(ps=>{const dispName=resolveName(ps.name);if(!agg[dispName])agg[dispName]={name:dispName,matches:0,runs:0,balls:0,fours:0,sixes:0,outs:0,wickets:0,runsConceded:0,oversBowled:0,wides:0,noballs:0,wins:0,highScore:0,bestWickets:0,fifties:0,hundreds:0,catches:0,runOuts:0,runOutAssists:0,runOutsAgainst:0,matchRuns:[],matchWickets:[],matchDates:[]};const a=agg[dispName];a.matches++;a.runs+=ps.runs||0;a.balls+=ps.balls||0;a.fours+=ps.fours||0;a.sixes+=ps.sixes||0;a.outs+=ps.outs||0;a.wickets+=ps.wickets||0;a.runsConceded+=ps.runsConceded||0;a.oversBowled+=ps.oversBowled||0;a.wides+=ps.wides||0;a.noballs+=ps.noballs||0;a.wins+=ps.wins||0;if((ps.highScore||0)>a.highScore)a.highScore=ps.highScore||0;if((ps.bestWickets||0)>a.bestWickets)a.bestWickets=ps.bestWickets||0;
-        // Fielding stats — only present on matches saved with this update or later. Default to 0.
-        a.catches+=ps.catches||0;
-        a.runOuts+=ps.runOuts||0;
-        a.runOutAssists+=ps.runOutAssists||0;
-        a.runOutsAgainst+=ps.runOutsAgainst||0;
-        // Milestone backfill: for matches saved BEFORE this update, ps.fifties / ps.hundreds will be undefined.
-        // Fall back to ps.runs (which is the player's runs IN THIS MATCH only, since each match doc holds per-match player stats).
-        // Higher milestone wins — never both.
-        if(typeof ps.hundreds==='number'||typeof ps.fifties==='number'){
-          a.hundreds+=ps.hundreds||0;
-          a.fifties+=ps.fifties||0;
-        } else {
+      const agg=computeLbAgg(lbMatches);
+      lbData=Object.values(agg);
+      _lbDataCache=lbData;
+      _lbCacheKey=fp;
+      _h2hCache={};
+    }
+    const totalMatches=lbMatches.length;
+    const totalRuns=lbMatches.reduce((s,m)=>s+(m.matchStats?m.matchStats.totalRuns||0:0),0);
+    document.getElementById('lb-meta').textContent=`${totalMatches} match${totalMatches!==1?'es':''} · ${totalRuns} runs scored`;
+    document.getElementById('tab-indicator').style.transform='translateX(0)';
+    renderLbTab(lbTab||'batting');
+  };
+  if(Array.isArray(lbMatches)&&lbMatches.length>0){
+    doRender();
+  } else {
+    document.getElementById('lb-meta').textContent='Loading...';
+  }
+  // Background refresh
+  if(window._dbReady){
+    try{
+      const fresh=await fetchMatchesAndCache();
+      if(fresh){
+        lbMatches=fresh;
+        invalidateLeaderboardCaches();
+        doRender();
+      }
+    }catch(e){document.getElementById('lb-meta').textContent='Could not load';}
+  } else if(!Array.isArray(lbMatches)||lbMatches.length===0){
+    document.getElementById('lb-meta').textContent='Not connected';
+  }
+}
+
+// Compute aggregated leaderboard data from a matches list.
+// Extracted out so loadLeaderboard can call it on both cached and fresh data without duplicating the loop.
+function computeLbAgg(matches){
+  const agg={};
+  matches.forEach(m=>{if(!m.playerStats)return;m.playerStats.forEach(ps=>{const dispName=resolveName(ps.name);if(!agg[dispName])agg[dispName]={name:dispName,matches:0,runs:0,balls:0,fours:0,sixes:0,outs:0,wickets:0,runsConceded:0,oversBowled:0,wides:0,noballs:0,wins:0,highScore:0,bestWickets:0,fifties:0,hundreds:0,catches:0,runOuts:0,runOutAssists:0,runOutsAgainst:0,matchRuns:[],matchWickets:[],matchDates:[]};const a=agg[dispName];a.matches++;a.runs+=ps.runs||0;a.balls+=ps.balls||0;a.fours+=ps.fours||0;a.sixes+=ps.sixes||0;a.outs+=ps.outs||0;a.wickets+=ps.wickets||0;a.runsConceded+=ps.runsConceded||0;a.oversBowled+=ps.oversBowled||0;a.wides+=ps.wides||0;a.noballs+=ps.noballs||0;a.wins+=ps.wins||0;if((ps.highScore||0)>a.highScore)a.highScore=ps.highScore||0;if((ps.bestWickets||0)>a.bestWickets)a.bestWickets=ps.bestWickets||0;
+    a.catches+=ps.catches||0;
+    a.runOuts+=ps.runOuts||0;
+    a.runOutAssists+=ps.runOutAssists||0;
+    a.runOutsAgainst+=ps.runOutsAgainst||0;
+    if(typeof ps.hundreds==='number'||typeof ps.fifties==='number'){
+      a.hundreds+=ps.hundreds||0;
+      a.fifties+=ps.fifties||0;
+    } else {
           const r=ps.runs||0;
           if(r>=100)a.hundreds++;
           else if(r>=50)a.fifties++;
@@ -4145,7 +4395,6 @@ async function loadLeaderboard(){
         a.matchRuns.push(ps.runs||0);a.matchWickets.push(ps.wickets||0);a.matchDates.push(m.date||'');});
         // FIELDING BACKFILL: matches saved before this update have no catches/runOuts in their playerStats.
         // Walk matchData.inn[*].balls to compute them retroactively from Caught + RunOut wicket events.
-        // Skip if ANY player in this match already has a non-zero fielding stat (means it was saved with the new format).
         const hasNewFormat=(m.playerStats||[]).some(ps=>(ps.catches||ps.runOuts||ps.runOutAssists||ps.runOutsAgainst));
         if(!hasNewFormat&&m.matchData){
           try{
@@ -4155,10 +4404,9 @@ async function loadLeaderboard(){
               if(!inn||!inn.balls)return;
               (inn.balls).forEach(ball=>{
                 if(ball.type!=='wicket')return;
-                if(ball.how==='Caught'&&ball.catcher){
+                if(ball.how==='Caught'&&ball.catcher&&ball.catcher!=='Unknown'){
                   const dn=resolveName(ball.catcher);
-                  if(!agg[dn])return; // catcher must already be in agg via their playerStats entry
-                  agg[dn].catches++;
+                  if(agg[dn])agg[dn].catches++;
                 }
                 if(ball.how==='RunOut'){
                   if(ball.completer){
@@ -4169,7 +4417,6 @@ async function loadLeaderboard(){
                     const dn=resolveName(ball.thrower);
                     if(agg[dn])agg[dn].runOutAssists++;
                   }
-                  // Run-out against — credit the dismissed batsman (find via batsmanIdx + team).
                   if(ball.batsmanIdx!=null&&inn.batsmen&&inn.batsmen[ball.batsmanIdx]){
                     const dn=resolveName(inn.batsmen[ball.batsmanIdx].name);
                     if(agg[dn])agg[dn].runOutsAgainst++;
@@ -4180,16 +4427,9 @@ async function loadLeaderboard(){
           }catch(e){/* malformed matchData — skip silently */}
         }
       });
-      lbData=Object.values(agg);
-      _lbDataCache=lbData;
-      _lbCacheKey=fp;
-      _h2hCache={}; // h2h depends on the same data, so invalidate together
-    }
-    const totalMatches=lbMatches.length;const totalRuns=lbMatches.reduce((s,m)=>s+(m.matchStats?m.matchStats.totalRuns||0:0),0);
-    document.getElementById('lb-meta').textContent=`${totalMatches} match${totalMatches!==1?'es':''} · ${totalRuns} runs scored`;
-    document.getElementById('tab-indicator').style.transform='translateX(0)';renderLbTab('batting');
-  }catch(e){document.getElementById('lb-meta').textContent='Could not load';}
+  return agg;
 }
+
 function getLeads(p){
   if(!lbData||lbData.length===0)return[];const leads=[];
   const topRuns=lbData.reduce((a,b)=>b.runs>a.runs?b:a,lbData[0]);if(topRuns.name===p.name&&p.runs>0)leads.push('👑 Top Scorer');
@@ -4548,6 +4788,18 @@ function buildSheetHTML(p){
 // ═══ INIT ═══
 // Try loading aliases from localStorage immediately (instant) — Firebase will refresh after dbready.
 try{const raw=localStorage.getItem('gc-aliases');if(raw)_aliases=JSON.parse(raw)||Object.create(null);}catch(e){}
+// LOAD MATCHES CACHE IMMEDIATELY — so home recent + leaderboard show data within 100ms instead of 5–10s.
+// Firebase fetch in background will refresh this when it completes.
+const _cachedMatches=loadLbCache();
+if(_cachedMatches){
+  lbMatches=_cachedMatches;
+  // Defer renders to after DOMContentLoaded so the screens are available
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',()=>{loadHomeRecent();},{once:true});
+  } else {
+    setTimeout(()=>loadHomeRecent(),0);
+  }
+}
 // Initial network dot state
 updateNetDot(navigator.onLine===false?'offline':'connecting');
 window.addEventListener('dbready',async()=>{
@@ -4555,7 +4807,7 @@ window.addEventListener('dbready',async()=>{
   // One-time migration: promote legacy per-device active_match docs to the shared 'current' slot
   try{if(window._db.migrateLegacyActiveMatch)await window._db.migrateLegacyActiveMatch();}catch(e){}
   // Pre-load matches so the chooser has the full name pool from the very first time setup is opened
-  try{if(window._dbReady)lbMatches=await window._db.getMatches();}catch(e){}
+  try{if(window._dbReady){const _m=await fetchMatchesAndCache();if(_m){lbMatches=_m;invalidateLeaderboardCaches();}}}catch(e){}
   // Sync local→cloud if local has newer unsaved progress
   await syncLocalToCloudIfNewer();
   loadHomeRecent();checkActiveMatch();startActiveMatchPoller();
@@ -4566,7 +4818,7 @@ if(window._dbReady){
   (async()=>{
     await loadAliases();
     try{if(window._db.migrateLegacyActiveMatch)await window._db.migrateLegacyActiveMatch();}catch(e){}
-    try{lbMatches=await window._db.getMatches();}catch(e){}
+    try{{const _m=await fetchMatchesAndCache();if(_m){lbMatches=_m;invalidateLeaderboardCaches();}}}catch(e){}
     await syncLocalToCloudIfNewer();
     loadHomeRecent();checkActiveMatch();startActiveMatchPoller();
     refreshRecoveryButton();
